@@ -174,7 +174,7 @@ cd object_detection/yolox
 
 # Other languages
 
-- [python version](https://github.com/axinc-ai/ailia-models)
-- [unity version](https://github.com/axinc-ai/ailia-models-unity)
-- [flutter version](https://github.com/axinc-ai/ailia-models-flutter)
-- [rust version](https://github.com/axinc-ai/ailia-models-rust)
+- [python version](https://github.com/ailia-ai/ailia-models)
+- [unity version](https://github.com/ailia-ai/ailia-models-unity)
+- [flutter version](https://github.com/ailia-ai/ailia-models-flutter)
+- [rust version](https://github.com/ailia-ai/ailia-models-rust)
