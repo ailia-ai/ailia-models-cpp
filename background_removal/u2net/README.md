@@ -2,7 +2,7 @@
 
 ## Setup
 
-[Check ailia-models-cpp/README.md](https://github.com/axinc-ai/ailia-models-cpp)
+[Check ailia-models-cpp/README.md](https://github.com/ailia-ai/ailia-models-cpp)
 
 ## Input
 
@@ -44,4 +44,4 @@ make
 
 ## Arguments
 
-[Check Python version](https://github.com/axinc-ai/ailia-models/tree/master/image_segmentation/u2net)
+[Check Python version](https://github.com/ailia-ai/ailia-models/tree/master/image_segmentation/u2net)
