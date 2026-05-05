@@ -45,5 +45,7 @@ jobs:
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
+        rm CMakeCache.txt
+        rm -rf CMakeFiles
         cmake .
-        cmake --build . --target clean
+        cmake --build .
