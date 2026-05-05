@@ -181,7 +181,7 @@ cd object_detection/yolox
 | [yolov3-tiny](/object_detection/yolov3-tiny/) | [YOLO: Real-Time Object Detection](https://pjreddie.com/darknet/yolo/) | ONNX Runtime | 1.2.1 and later |
 | [m2det](/object_detection/m2det/) | [M2Det: A Single-Shot Object Detector based on Multi-Level Feature Pyramid Network](https://github.com/qijiezhao/M2Det) | Pytorch | 1.2.3 and later |
 | [yolox](/object_detection/yolox/) | [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX) | Pytorch | 1.2.6 and later |
-| [yolox_tflite](/object_detection/yolox_tflite/) | [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX) (ailia TFLite Runtime) | Pytorch | TFLite 1.1.0 and later |
+| [yolox_tflite](/object_detection/yolox_tflite/) | [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX) | Pytorch | 1.1.0 and later |
 
 ## Object tracking
 
