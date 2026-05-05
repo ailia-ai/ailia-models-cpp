@@ -18,6 +18,22 @@ if(MSVC)
     # portable C API on purpose so that the same source builds on every
     # platform.
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+    # Treat source files as UTF-8 so that Japanese string literals do not
+    # trigger C4566 ("character cannot be represented in the current code
+    # page (1252)").
+    add_compile_options(/utf-8)
+
+    # Silence the bulk numeric-conversion warnings that MSVC's default
+    # warning level emits. The samples mix int / size_t / unsigned int
+    # widely on purpose; adding casts to every site is not practical.
+    # - C4244 conversion, possible loss of data (e.g. double->float, float->int)
+    # - C4267 conversion from size_t to smaller int, possible loss of data
+    # - C4305 truncation from double to float in initializers
+    # - C4018 signed/unsigned mismatch in comparisons
+    # - C4477 wide format specifier mismatches that are implementation-
+    #         dependent (long vs __int64) and benign on x64
+    add_compile_options(/wd4244 /wd4267 /wd4305 /wd4018 /wd4477)
 endif()
 
 # When OFF, skip every sample that requires OpenCV. Useful when only
