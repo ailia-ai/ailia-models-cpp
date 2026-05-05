@@ -11,3 +11,15 @@ cmake_install.cmake
 Makefile
 ipadic
 *.spm
+
+# generated artifacts
+/**/build/
+output.wav
+
+# ailia Voice / GPT-SoVITS sample data
+/audio_processing/gpt-sovits-v2-pro/gpt-sovits-v2-pro
+/audio_processing/gpt-sovits-v2-pro/onnx/
+/audio_processing/gpt-sovits-v2-pro/open_jtalk_dic_utf_8-1.11/
+/audio_processing/gpt-sovits-v2-pro/g2p_en/
+/audio_processing/gpt-sovits-v2-pro/g2p_cn/
+/audio_processing/gpt-sovits-v2-pro/g2pw/
