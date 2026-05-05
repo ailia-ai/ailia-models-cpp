@@ -12,11 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <opencv2/opencv.hpp>
 
 #include "ailia_tflite.h"
+
+#include "utils.h"
+#include "webcamera_utils.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -26,7 +30,7 @@ typedef LARGE_INTEGER ailia_time_t;
 static void get_ailia_time(ailia_time_t *t) {
     QueryPerformanceCounter(t);
 }
-static int64_t calc_predict_time(ailia_time_t start, ailia_time_t finish) {
+static int64_t calc_predict_time_us(ailia_time_t start, ailia_time_t finish) {
     LARGE_INTEGER freq;
     QueryPerformanceFrequency(&freq);
     return (finish.QuadPart - start.QuadPart) * (int64_t)1000000 / freq.QuadPart;
@@ -41,7 +45,7 @@ static void get_ailia_time(ailia_time_t *t) {
     clock_gettime(CLOCK_MONOTONIC, &now);
     *t = now.tv_sec * (int64_t)1000000000 + now.tv_nsec;
 }
-static int64_t calc_predict_time(ailia_time_t start, ailia_time_t finish) {
+static int64_t calc_predict_time_us(ailia_time_t start, ailia_time_t finish) {
     return (finish - start) / (int64_t)1000;
 }
 #endif
@@ -50,10 +54,13 @@ static int64_t calc_predict_time(ailia_time_t start, ailia_time_t finish) {
 // Parameters
 // ======================
 
-#define WEIGHT_PATH "yolox_tiny_full_integer_quant.opt.tflite"
-#define IMAGE_PATH  "input.jpg"
+#define WEIGHT_PATH     "yolox_tiny_full_integer_quant.opt.tflite"
+#define IMAGE_PATH      "input.jpg"
+#define SAVE_IMAGE_PATH "output.png"
 
 #define DETECTION_THRESHOLD 0.5f
+#define IOU_THRESHOLD       0.45f
+#define BENCHMARK_ITERS     5
 
 static const std::vector<const char*> COCO_CATEGORY = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train",
@@ -73,17 +80,31 @@ static const std::vector<const char*> COCO_CATEGORY = {
 
 static std::string weight(WEIGHT_PATH);
 static std::string image_path(IMAGE_PATH);
+static std::string video_path("0");
+static std::string save_image_path(SAVE_IMAGE_PATH);
+
+static bool benchmark = false;
+static bool video_mode = false;
 static int args_env_id = AILIA_TFLITE_ENV_REFERENCE;
+
+// ======================
+// Detection struct
+// ======================
+
+struct Detection {
+    int class_id;
+    float score;
+    // bbox in input image (model input) coordinates: top-left corner + size
+    float x, y, w, h;
+};
 
 // ======================
 // File I/O
 // ======================
 
-static int load_file(std::vector<uint8_t>& buf, const char *path) {
+static int load_file(std::vector<uint8_t>& buf, const char* path) {
     FILE* fp = fopen(path, "rb");
-    if (!fp) {
-        return -1;
-    }
+    if (!fp) return -1;
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
@@ -94,29 +115,19 @@ static int load_file(std::vector<uint8_t>& buf, const char *path) {
 }
 
 // ======================
-// Pre/Post Processing
+// Pre-processing
 // ======================
 
-static int load_image(AILIATFLiteTensorType input_tensor_type,
-                      uint8_t* input_buffer, const int32_t* input_shape,
-                      const std::string& path) {
-    cv::Mat img = cv::imread(path);
-    if (img.empty()) {
-        return -1;
-    }
-
+static void fill_input_tensor(AILIATFLiteTensorType input_tensor_type,
+                              uint8_t* input_buffer, const int32_t* input_shape,
+                              const cv::Mat& bgr) {
     const bool channel_last = (input_shape[3] == 3);
-    const int target_h = channel_last ? input_shape[1] : input_shape[2];
-    const int target_w = channel_last ? input_shape[2] : input_shape[3];
+    const int H = channel_last ? input_shape[1] : input_shape[2];
+    const int W = channel_last ? input_shape[2] : input_shape[3];
 
     cv::Mat resized;
-    cv::resize(img, resized, cv::Size(target_w, target_h));
+    cv::resize(bgr, resized, cv::Size(W, H));
 
-    PRINT_OUT("input image: %s, channel_last=%d, target=%dx%d\n",
-              path.c_str(), channel_last ? 1 : 0, target_w, target_h);
-
-    const int H = target_h;
-    const int W = target_w;
     if (input_tensor_type == AILIA_TFLITE_TENSOR_TYPE_FLOAT32) {
         float* dst = reinterpret_cast<float*>(input_buffer);
         for (int y = 0; y < H; ++y) {
@@ -136,7 +147,7 @@ static int load_image(AILIATFLiteTensorType input_tensor_type,
     } else {
         for (int y = 0; y < H; ++y) {
             for (int x = 0; x < W; ++x) {
-                cv::Vec3b px = resized.at<cv::Vec3b>(y, x); // BGR
+                cv::Vec3b px = resized.at<cv::Vec3b>(y, x);
                 if (channel_last) {
                     input_buffer[(y * W + x) * 3 + 0] = px[2];
                     input_buffer[(y * W + x) * 3 + 1] = px[1];
@@ -155,8 +166,11 @@ static int load_image(AILIATFLiteTensorType input_tensor_type,
             }
         }
     }
-    return 0;
 }
+
+// ======================
+// Post-processing
+// ======================
 
 static inline float dequantize(uint8_t val, float scale, int64_t zero_point,
                                AILIATFLiteTensorType tensor_type) {
@@ -167,29 +181,17 @@ static inline float dequantize(uint8_t val, float scale, int64_t zero_point,
     return ((float)val - (float)zero_point) * scale;
 }
 
-static void post_process_yolox(const int32_t* input_shape, const int32_t* output_shape,
+static void decode_yolox_quant(const int32_t* input_shape, const int32_t* output_shape,
                                const uint8_t* output_buffer,
                                AILIATFLiteTensorType output_tensor_type,
-                               float quant_scale, int64_t quant_zero_point,
-                               const std::vector<const char*>& category, float threshold) {
-    int ih, iw;
-    if (input_shape[3] == 3) {
-        ih = input_shape[1];
-        iw = input_shape[2];
-    } else {
-        ih = input_shape[2];
-        iw = input_shape[3];
-    }
-    const int oh[3] = { ih / 8,  ih / 16, ih / 32 };
-    const int ow[3] = { iw / 8,  iw / 16, iw / 32 };
-    const int num_cells = oh[0] * ow[0] + oh[1] * ow[1] + oh[2] * ow[2];
-    const int num_category = (int)category.size();
+                               float scale, int64_t zero_point,
+                               int num_category, float threshold,
+                               std::vector<Detection>& dets) {
+    int ih = (input_shape[3] == 3) ? input_shape[1] : input_shape[2];
+    int iw = (input_shape[3] == 3) ? input_shape[2] : input_shape[3];
+    const int oh[3] = { ih / 8, ih / 16, ih / 32 };
+    const int ow[3] = { iw / 8, iw / 16, iw / 32 };
     const int num_elements = 5 + num_category;
-    if (num_cells != output_shape[1] || num_elements != output_shape[2]) {
-        PRINT_ERR("error! yolox output_shape[1,2]=(%d, %d) != (%d, %d)\n",
-                  output_shape[1], output_shape[2], num_cells, num_elements);
-        return;
-    }
 
     const uint8_t* buf = output_buffer;
     for (int s = 0; s < 3; ++s) {
@@ -202,31 +204,31 @@ static void post_process_yolox(const int32_t* input_shape, const int32_t* output
                 for (int cls = 0; cls < num_category; ++cls) {
                     if (output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_INT8) {
                         int8_t v = *reinterpret_cast<const int8_t*>(cats + cls);
-                        if ((uint8_t)v > max_score) {
-                            max_score = (uint8_t)v;
-                            max_class = cls;
-                        }
+                        if ((uint8_t)v > max_score) { max_score = (uint8_t)v; max_class = cls; }
                     } else {
-                        if (cats[cls] > max_score) {
-                            max_score = cats[cls];
-                            max_class = cls;
-                        }
+                        if (cats[cls] > max_score) { max_score = cats[cls]; max_class = cls; }
                     }
                 }
-                float score = dequantize(max_score, quant_scale, quant_zero_point, output_tensor_type);
-                float c = dequantize(buf[4], quant_scale, quant_zero_point, output_tensor_type);
+                float score = dequantize(max_score, scale, zero_point, output_tensor_type);
+                float c = dequantize(buf[4], scale, zero_point, output_tensor_type);
                 score *= c;
                 if (score >= threshold) {
-                    float cx = dequantize(buf[0], quant_scale, quant_zero_point, output_tensor_type);
-                    float cy = dequantize(buf[1], quant_scale, quant_zero_point, output_tensor_type);
-                    float w  = dequantize(buf[2], quant_scale, quant_zero_point, output_tensor_type);
-                    float h  = dequantize(buf[3], quant_scale, quant_zero_point, output_tensor_type);
+                    float cx = dequantize(buf[0], scale, zero_point, output_tensor_type);
+                    float cy = dequantize(buf[1], scale, zero_point, output_tensor_type);
+                    float w  = dequantize(buf[2], scale, zero_point, output_tensor_type);
+                    float h  = dequantize(buf[3], scale, zero_point, output_tensor_type);
+                    Detection det;
+                    det.class_id = max_class;
+                    det.score = score;
                     float bb_cx = (cx + x) * stride;
                     float bb_cy = (cy + y) * stride;
                     float bb_w  = expf(w) * stride + 1.f;
                     float bb_h  = expf(h) * stride + 1.f;
-                    PRINT_OUT("class[%d, %s], score=%f, bb=[cx=%f, cy=%f, w=%f, h=%f]\n",
-                              max_class, category[max_class], score, bb_cx, bb_cy, bb_w, bb_h);
+                    det.x = bb_cx - bb_w * 0.5f;
+                    det.y = bb_cy - bb_h * 0.5f;
+                    det.w = bb_w;
+                    det.h = bb_h;
+                    dets.push_back(det);
                 }
                 buf += num_elements;
             }
@@ -234,27 +236,15 @@ static void post_process_yolox(const int32_t* input_shape, const int32_t* output
     }
 }
 
-static void post_process_yolox_fp32(const int32_t* input_shape, const int32_t* output_shape,
-                                    const float* output_buffer,
-                                    const std::vector<const char*>& category, float threshold) {
-    int ih, iw;
-    if (input_shape[3] == 3) {
-        ih = input_shape[1];
-        iw = input_shape[2];
-    } else {
-        ih = input_shape[2];
-        iw = input_shape[3];
-    }
-    const int oh[3] = { ih / 8,  ih / 16, ih / 32 };
-    const int ow[3] = { iw / 8,  iw / 16, iw / 32 };
-    const int num_cells = oh[0] * ow[0] + oh[1] * ow[1] + oh[2] * ow[2];
-    const int num_category = (int)category.size();
+static void decode_yolox_fp32(const int32_t* input_shape, const int32_t* output_shape,
+                              const float* output_buffer,
+                              int num_category, float threshold,
+                              std::vector<Detection>& dets) {
+    int ih = (input_shape[3] == 3) ? input_shape[1] : input_shape[2];
+    int iw = (input_shape[3] == 3) ? input_shape[2] : input_shape[3];
+    const int oh[3] = { ih / 8, ih / 16, ih / 32 };
+    const int ow[3] = { iw / 8, iw / 16, iw / 32 };
     const int num_elements = 5 + num_category;
-    if (num_cells != output_shape[1] || num_elements != output_shape[2]) {
-        PRINT_ERR("error! yolox output_shape[1,2]=(%d, %d) != (%d, %d)\n",
-                  output_shape[1], output_shape[2], num_cells, num_elements);
-        return;
-    }
 
     const float* buf = output_buffer;
     for (int s = 0; s < 3; ++s) {
@@ -265,19 +255,22 @@ static void post_process_yolox_fp32(const int32_t* input_shape, const int32_t* o
                 int max_class = 0;
                 const float* cats = buf + 5;
                 for (int cls = 0; cls < num_category; ++cls) {
-                    if (cats[cls] > max_score) {
-                        max_score = cats[cls];
-                        max_class = cls;
-                    }
+                    if (cats[cls] > max_score) { max_score = cats[cls]; max_class = cls; }
                 }
                 float score = max_score * buf[4];
                 if (score >= threshold) {
+                    Detection det;
+                    det.class_id = max_class;
+                    det.score = score;
                     float bb_cx = (buf[0] + x) * stride;
                     float bb_cy = (buf[1] + y) * stride;
                     float bb_w  = expf(buf[2]) * stride + 1.f;
                     float bb_h  = expf(buf[3]) * stride + 1.f;
-                    PRINT_OUT("class[%d, %s], score=%f, bb=[cx=%f, cy=%f, w=%f, h=%f]\n",
-                              max_class, category[max_class], score, bb_cx, bb_cy, bb_w, bb_h);
+                    det.x = bb_cx - bb_w * 0.5f;
+                    det.y = bb_cy - bb_h * 0.5f;
+                    det.w = bb_w;
+                    det.h = bb_h;
+                    dets.push_back(det);
                 }
                 buf += num_elements;
             }
@@ -285,12 +278,236 @@ static void post_process_yolox_fp32(const int32_t* input_shape, const int32_t* o
     }
 }
 
+static float iou(const Detection& a, const Detection& b) {
+    float x1 = std::max(a.x, b.x);
+    float y1 = std::max(a.y, b.y);
+    float x2 = std::min(a.x + a.w, b.x + b.w);
+    float y2 = std::min(a.y + a.h, b.y + b.h);
+    float inter = std::max(0.f, x2 - x1) * std::max(0.f, y2 - y1);
+    float u = a.w * a.h + b.w * b.h - inter;
+    return (u > 0.f) ? (inter / u) : 0.f;
+}
+
+static std::vector<Detection> nms(std::vector<Detection> dets, float iou_threshold) {
+    std::sort(dets.begin(), dets.end(),
+              [](const Detection& a, const Detection& b) { return a.score > b.score; });
+    std::vector<Detection> result;
+    std::vector<bool> suppressed(dets.size(), false);
+    for (size_t i = 0; i < dets.size(); ++i) {
+        if (suppressed[i]) continue;
+        result.push_back(dets[i]);
+        for (size_t j = i + 1; j < dets.size(); ++j) {
+            if (suppressed[j] || dets[j].class_id != dets[i].class_id) continue;
+            if (iou(dets[i], dets[j]) > iou_threshold) suppressed[j] = true;
+        }
+    }
+    return result;
+}
+
+static void draw_detections(cv::Mat& img, const std::vector<Detection>& dets,
+                            int input_w, int input_h) {
+    const float sx = (float)img.cols / (float)input_w;
+    const float sy = (float)img.rows / (float)input_h;
+    for (const Detection& d : dets) {
+        int x = (int)(d.x * sx);
+        int y = (int)(d.y * sy);
+        int w = (int)(d.w * sx);
+        int h = (int)(d.h * sy);
+        cv::Rect r(x, y, w, h);
+        cv::rectangle(img, r, cv::Scalar(0, 255, 0), 2);
+        char label[256];
+        const char* name = (d.class_id >= 0 && d.class_id < (int)COCO_CATEGORY.size())
+            ? COCO_CATEGORY[d.class_id] : "?";
+        snprintf(label, sizeof(label), "%s %.2f", name, d.score);
+        int base = 0;
+        cv::Size ts = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &base);
+        cv::rectangle(img, cv::Point(x, y - ts.height - 4),
+                      cv::Point(x + ts.width, y), cv::Scalar(0, 255, 0), cv::FILLED);
+        cv::putText(img, label, cv::Point(x, y - 2),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0), 1);
+    }
+}
+
+// ======================
+// Inference helpers
+// ======================
+
+static int decode_output(struct AILIATFLiteInstance* instance,
+                         const int32_t* input_shape,
+                         std::vector<Detection>& dets) {
+    int32_t output_tensor_index = 0;
+    ailiaTFLiteGetOutputTensorIndex(instance, &output_tensor_index, 0);
+
+    uint8_t* output_buffer = NULL;
+    ailiaTFLiteGetTensorBuffer(instance, reinterpret_cast<void**>(&output_buffer), output_tensor_index);
+
+    int32_t output_shape[4] = { 0, 0, 0, 0 };
+    ailiaTFLiteGetTensorShape(instance, output_shape, output_tensor_index);
+
+    AILIATFLiteTensorType output_tensor_type = AILIA_TFLITE_TENSOR_TYPE_UINT8;
+    ailiaTFLiteGetTensorType(instance, &output_tensor_type, output_tensor_index);
+
+    const int num_category = (int)COCO_CATEGORY.size();
+    int ih = (input_shape[3] == 3) ? input_shape[1] : input_shape[2];
+    const int num_cells = (ih / 8) * (ih / 8) + (ih / 16) * (ih / 16) + (ih / 32) * (ih / 32);
+    if (output_shape[1] != num_cells || output_shape[2] != 5 + num_category) {
+        PRINT_ERR("error! yolox output_shape[1,2]=(%d, %d) != (%d, %d)\n",
+                  output_shape[1], output_shape[2], num_cells, 5 + num_category);
+        return -1;
+    }
+
+    if (output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_FLOAT32) {
+        decode_yolox_fp32(input_shape, output_shape,
+                          reinterpret_cast<const float*>(output_buffer),
+                          num_category, DETECTION_THRESHOLD, dets);
+    } else if (output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_UINT8 ||
+               output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_INT8) {
+        int32_t quant_count = 0;
+        ailiaTFLiteGetTensorQuantizationCount(instance, &quant_count, output_tensor_index);
+        if (quant_count != 1) {
+            PRINT_ERR("output tensor quant count=%d != 1\n", quant_count);
+            return -1;
+        }
+        float scale = 1.f;
+        int64_t zero_point = 0;
+        ailiaTFLiteGetTensorQuantizationScale(instance, &scale, output_tensor_index);
+        ailiaTFLiteGetTensorQuantizationZeroPoint(instance, &zero_point, output_tensor_index);
+        decode_yolox_quant(input_shape, output_shape, output_buffer, output_tensor_type,
+                           scale, zero_point, num_category, DETECTION_THRESHOLD, dets);
+    } else {
+        PRINT_ERR("unsupported output tensor type=%d\n", output_tensor_type);
+        return -1;
+    }
+    return 0;
+}
+
+static int predict(struct AILIATFLiteInstance* instance, const cv::Mat& bgr,
+                   std::vector<Detection>& dets, int& input_w, int& input_h,
+                   int64_t& predict_time_us) {
+    int32_t input_tensor_index = 0;
+    ailiaTFLiteGetInputTensorIndex(instance, &input_tensor_index, 0);
+
+    uint8_t* input_buffer = NULL;
+    ailiaTFLiteGetTensorBuffer(instance, reinterpret_cast<void**>(&input_buffer), input_tensor_index);
+
+    int32_t input_shape[4] = { 0, 0, 0, 0 };
+    ailiaTFLiteGetTensorShape(instance, input_shape, input_tensor_index);
+
+    AILIATFLiteTensorType input_tensor_type = AILIA_TFLITE_TENSOR_TYPE_UINT8;
+    ailiaTFLiteGetTensorType(instance, &input_tensor_type, input_tensor_index);
+
+    input_w = (input_shape[3] == 3) ? input_shape[2] : input_shape[3];
+    input_h = (input_shape[3] == 3) ? input_shape[1] : input_shape[2];
+
+    fill_input_tensor(input_tensor_type, input_buffer, input_shape, bgr);
+
+    ailia_time_t start, end;
+    get_ailia_time(&start);
+    AILIATFLiteStatus status = ailiaTFLitePredict(instance);
+    get_ailia_time(&end);
+    predict_time_us = calc_predict_time_us(start, end);
+    if (status != AILIA_TFLITE_STATUS_SUCCESS) {
+        PRINT_ERR("ailiaTFLitePredict failed %d\n", status);
+        return -1;
+    }
+
+    std::vector<Detection> raw;
+    if (decode_output(instance, input_shape, raw) != 0) {
+        return -1;
+    }
+    dets = nms(raw, IOU_THRESHOLD);
+    return 0;
+}
+
+// ======================
+// Image / Video flows
+// ======================
+
+static int recognize_from_image(struct AILIATFLiteInstance* instance) {
+    cv::Mat img = cv::imread(image_path);
+    if (img.empty()) {
+        PRINT_ERR("[ERROR] Failed to load image: %s\n", image_path.c_str());
+        return -1;
+    }
+    PRINT_OUT("input image shape: (%d, %d, %d)\n", img.cols, img.rows, img.channels());
+
+    PRINT_OUT("Start inference...\n");
+    std::vector<Detection> dets;
+    int input_w = 0, input_h = 0;
+    int64_t predict_us = 0;
+
+    if (benchmark) {
+        PRINT_OUT("BENCHMARK mode\n");
+        for (int i = 0; i < BENCHMARK_ITERS; i++) {
+            dets.clear();
+            if (predict(instance, img, dets, input_w, input_h, predict_us) != 0) return -1;
+            PRINT_OUT("\tailia processing time %lld ms\n", (long long)(predict_us / 1000));
+        }
+    } else {
+        if (predict(instance, img, dets, input_w, input_h, predict_us) != 0) return -1;
+        PRINT_OUT("inference time %lld ms\n", (long long)(predict_us / 1000));
+    }
+
+    for (const Detection& d : dets) {
+        const char* name = (d.class_id >= 0 && d.class_id < (int)COCO_CATEGORY.size())
+            ? COCO_CATEGORY[d.class_id] : "?";
+        PRINT_OUT("class[%d, %s], score=%f, bbox=[x=%.1f, y=%.1f, w=%.1f, h=%.1f]\n",
+                  d.class_id, name, d.score, d.x, d.y, d.w, d.h);
+    }
+
+    draw_detections(img, dets, input_w, input_h);
+    cv::imwrite(save_image_path, img);
+    PRINT_OUT("Saved to %s\n", save_image_path.c_str());
+
+    PRINT_OUT("Program finished successfully.\n");
+    return 0;
+}
+
+static int recognize_from_video(struct AILIATFLiteInstance* instance) {
+    cv::VideoCapture capture;
+    if (video_path == "0") {
+        PRINT_OUT("[INFO] webcamera mode is activated\n");
+        capture.open(0);
+        if (!capture.isOpened()) {
+            PRINT_ERR("[ERROR] webcamera not found\n");
+            return -1;
+        }
+    } else {
+        if (!check_file_existance(video_path.c_str())) {
+            PRINT_ERR("[ERROR] \"%s\" not found\n", video_path.c_str());
+            return -1;
+        }
+        capture.open(video_path);
+    }
+
+    while (true) {
+        cv::Mat frame;
+        capture >> frame;
+        if ((char)cv::waitKey(1) == 'q' || frame.empty()) break;
+
+        std::vector<Detection> dets;
+        int input_w = 0, input_h = 0;
+        int64_t predict_us = 0;
+        if (predict(instance, frame, dets, input_w, input_h, predict_us) != 0) {
+            return -1;
+        }
+        draw_detections(frame, dets, input_w, input_h);
+        cv::imshow("frame", frame);
+    }
+    capture.release();
+    cv::destroyAllWindows();
+
+    PRINT_OUT("Program finished successfully.\n");
+    return 0;
+}
+
 // ======================
 // Argument Parser
 // ======================
 
 static void print_usage() {
-    PRINT_OUT("usage: yolox_tflite [-h] [-i FILE] [-w MODEL] [-e ENV_ID]\n");
+    PRINT_OUT("usage: yolox_tflite [-h] [-i IMAGE] [-v VIDEO] [-s SAVE_IMAGE_PATH] "
+              "[-w MODEL] [-b] [-e ENV_ID]\n");
 }
 
 static void print_help() {
@@ -299,10 +516,16 @@ static void print_help() {
     PRINT_OUT("\n");
     PRINT_OUT("optional arguments:\n");
     PRINT_OUT("  -h, --help            show this help message and exit\n");
-    PRINT_OUT("  -i FILE, --input FILE\n");
-    PRINT_OUT("                        The input image file (default: input.jpg)\n");
+    PRINT_OUT("  -i IMAGE, --input IMAGE\n");
+    PRINT_OUT("                        The input image path (default: input.jpg)\n");
+    PRINT_OUT("  -v VIDEO, --video VIDEO\n");
+    PRINT_OUT("                        The input video path. If 0, the webcam is used.\n");
+    PRINT_OUT("  -s SAVE_IMAGE_PATH, --savepath SAVE_IMAGE_PATH\n");
+    PRINT_OUT("                        Save path for the output image (default: output.png)\n");
     PRINT_OUT("  -w FILE, --weight FILE\n");
     PRINT_OUT("                        The .tflite model file (default: %s)\n", WEIGHT_PATH);
+    PRINT_OUT("  -b, --benchmark       Run inference 5 times to measure performance\n");
+    PRINT_OUT("                        (image mode only).\n");
     PRINT_OUT("  -e ENV_ID, --env_id ENV_ID\n");
     PRINT_OUT("                        AILIA_TFLITE_ENV_* (default: 0=REFERENCE)\n");
 }
@@ -318,10 +541,17 @@ static int argument_parser(int argc, char** argv) {
                 return -1;
             } else if (arg == "-i" || arg == "--input") {
                 status = 1;
-            } else if (arg == "-w" || arg == "--weight") {
+            } else if (arg == "-v" || arg == "--video") {
+                video_mode = true;
                 status = 2;
-            } else if (arg == "-e" || arg == "--env_id") {
+            } else if (arg == "-s" || arg == "--savepath") {
                 status = 3;
+            } else if (arg == "-w" || arg == "--weight") {
+                status = 4;
+            } else if (arg == "-b" || arg == "--benchmark") {
+                benchmark = true;
+            } else if (arg == "-e" || arg == "--env_id") {
+                status = 5;
             } else {
                 print_usage();
                 PRINT_ERR("yolox_tflite: error: unrecognized argument: %s\n", arg.c_str());
@@ -330,8 +560,10 @@ static int argument_parser(int argc, char** argv) {
         } else {
             switch (status) {
                 case 1: image_path = arg; break;
-                case 2: weight = arg; break;
-                case 3: args_env_id = atoi(arg.c_str()); break;
+                case 2: video_path = arg; break;
+                case 3: save_image_path = arg; break;
+                case 4: weight = arg; break;
+                case 5: args_env_id = atoi(arg.c_str()); break;
             }
             status = 0;
         }
@@ -373,80 +605,8 @@ int main(int argc, char** argv) {
 
     ailiaTFLiteAllocateTensors(instance);
 
-    int32_t input_tensor_index = 0;
-    ailiaTFLiteGetInputTensorIndex(instance, &input_tensor_index, 0);
-
-    uint8_t* input_buffer = NULL;
-    ailiaTFLiteGetTensorBuffer(instance, reinterpret_cast<void**>(&input_buffer), input_tensor_index);
-
-    int32_t input_shape[4] = { 0, 0, 0, 0 };
-    ailiaTFLiteGetTensorShape(instance, input_shape, input_tensor_index);
-
-    AILIATFLiteTensorType input_tensor_type = AILIA_TFLITE_TENSOR_TYPE_UINT8;
-    ailiaTFLiteGetTensorType(instance, &input_tensor_type, input_tensor_index);
-    PRINT_OUT("input tensor type=%d, shape=%d,%d,%d,%d\n",
-              input_tensor_type, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
-
-    if (load_image(input_tensor_type, input_buffer, input_shape, image_path) != 0) {
-        PRINT_ERR("Failed to load image: %s\n", image_path.c_str());
-        ailiaTFLiteDestroy(instance);
-        return -1;
-    }
-
-    {
-        ailia_time_t start, end;
-        get_ailia_time(&start);
-        status = ailiaTFLitePredict(instance);
-        get_ailia_time(&end);
-        if (status != AILIA_TFLITE_STATUS_SUCCESS) {
-            PRINT_ERR("ailiaTFLitePredict failed %d\n", status);
-            ailiaTFLiteDestroy(instance);
-            return -1;
-        }
-        PRINT_OUT("inference time %d [ms]\n", (int32_t)(calc_predict_time(start, end) / 1000));
-    }
-
-    int32_t output_tensor_index = 0;
-    ailiaTFLiteGetOutputTensorIndex(instance, &output_tensor_index, 0);
-
-    uint8_t* output_buffer = NULL;
-    ailiaTFLiteGetTensorBuffer(instance, reinterpret_cast<void**>(&output_buffer), output_tensor_index);
-
-    int32_t output_shape[4] = { 0, 0, 0, 0 };
-    ailiaTFLiteGetTensorShape(instance, output_shape, output_tensor_index);
-
-    AILIATFLiteTensorType output_tensor_type = AILIA_TFLITE_TENSOR_TYPE_UINT8;
-    ailiaTFLiteGetTensorType(instance, &output_tensor_type, output_tensor_index);
-    PRINT_OUT("output tensor type=%d, shape=%d,%d,%d,%d\n",
-              output_tensor_type, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
-
-    if (output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_FLOAT32) {
-        post_process_yolox_fp32(input_shape, output_shape,
-                                reinterpret_cast<float*>(output_buffer),
-                                COCO_CATEGORY, DETECTION_THRESHOLD);
-    } else if (output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_UINT8 ||
-               output_tensor_type == AILIA_TFLITE_TENSOR_TYPE_INT8) {
-        int32_t quant_count = 0;
-        ailiaTFLiteGetTensorQuantizationCount(instance, &quant_count, output_tensor_index);
-        if (quant_count != 1) {
-            PRINT_ERR("output tensor quant count=%d != 1\n", quant_count);
-        } else {
-            float quant_scale = 1.f;
-            int64_t quant_zero_point = 0;
-            int32_t quant_axis = 0;
-            ailiaTFLiteGetTensorQuantizationScale(instance, &quant_scale, output_tensor_index);
-            ailiaTFLiteGetTensorQuantizationZeroPoint(instance, &quant_zero_point, output_tensor_index);
-            ailiaTFLiteGetTensorQuantizationQuantizedDimension(instance, &quant_axis, output_tensor_index);
-            PRINT_OUT("output tensor scale=%f, zero_point=%lld, axis=%d\n",
-                      quant_scale, (long long)quant_zero_point, quant_axis);
-            post_process_yolox(input_shape, output_shape, output_buffer, output_tensor_type,
-                               quant_scale, quant_zero_point,
-                               COCO_CATEGORY, DETECTION_THRESHOLD);
-        }
-    } else {
-        PRINT_ERR("unsupported output tensor type=%d\n", output_tensor_type);
-    }
+    int rc = video_mode ? recognize_from_video(instance) : recognize_from_image(instance);
 
     ailiaTFLiteDestroy(instance);
-    return 0;
+    return rc;
 }

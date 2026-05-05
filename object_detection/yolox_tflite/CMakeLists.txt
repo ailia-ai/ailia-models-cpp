@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 
 set (PROJECT_NAME yolox_tflite)
 set (SRC_FILES ${PROJECT_NAME}.cpp)
+set (SRC_FILES ${SRC_FILES} ../../util/utils.cpp)
+set (SRC_FILES ${SRC_FILES} ../../util/webcamera_utils.cpp)
+set (SRC_FILES ${SRC_FILES} ../../util/image_utils.cpp)
+set (SRC_FILES ${SRC_FILES} ../../util/mat_utils.cpp)
 
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
