@@ -46,4 +46,4 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         cmake .
-        cmake --build .
+        cmake --build . --target clean
