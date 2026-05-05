@@ -18,7 +18,7 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
     fi
     if [ ! -e ${SAMPLE_VIDEO} ]; then
         echo "Downloading sample video... save path: ${SAMPLE_VIDEO}"
-        curl -L https://storage.googleapis.com/ailia-models/${MODEL}/${SAMPLE_VIDEO} -o ${SAMPLE_VIDEO}
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/object_tracking/${MODEL}/${SAMPLE_VIDEO} -o ${SAMPLE_VIDEO}
     fi
     echo "ONNX file and Prototxt file are prepared!"
 fi
