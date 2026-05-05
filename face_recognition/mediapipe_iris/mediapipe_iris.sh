@@ -21,6 +21,11 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
         fi
     done
 
+    if [ ! -e man.jpg ]; then
+        echo "Downloading sample image file... save path: man.jpg"
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/face_recognition/mediapipe_iris/man.jpg -o man.jpg
+    fi
+
     echo "ONNX files and Prototxt files are prepared!"
 fi
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 MODEL="t5_whisper_medical"
-FILE1="seq2seq-lm-with-past.onnx"
-FILE2="seq2seq-lm-with-past.onnx.prototxt"
+FILE1="t5_whisper_medical-decoder-with-lm-head.obf.onnx"
+FILE2="t5_whisper_medical-decoder-with-lm-head.onnx.prototxt"
 FILE3="t5_whisper_medical-encoder.obf.onnx"
 FILE4="t5_whisper_medical-encoder.onnx.prototxt"
 FILE5="spiece.model"

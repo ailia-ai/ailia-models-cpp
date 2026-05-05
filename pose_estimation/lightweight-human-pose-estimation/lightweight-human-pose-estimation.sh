@@ -26,6 +26,10 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
         curl https://storage.googleapis.com/ailia-models/${MODEL}/${FILE2} -o ${FILE2}
 #        wget https://storage.googleapis.com/ailia-models/${MODEL}/${FILE2}
     fi
+    if [ ! -e balloon.png ]; then
+        echo "Downloading sample image file... save path: balloon.png"
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/pose_estimation/lightweight-human-pose-estimation/input.jpg -o balloon.png
+    fi
     echo "ONNX file and Prototxt file are prepared!"
 fi
 

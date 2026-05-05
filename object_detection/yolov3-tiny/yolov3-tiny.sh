@@ -18,6 +18,10 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
         curl https://storage.googleapis.com/ailia-models/${MODEL}/${FILE2} -o ${FILE2}
 #        wget https://storage.googleapis.com/ailia-models/${MODEL}/${FILE2}
     fi
+    if [ ! -e couple.jpg ]; then
+        echo "Downloading sample image file... save path: couple.jpg"
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/face_detection/yolov3-face/couple.jpg -o couple.jpg
+    fi
     echo "ONNX file and Prototxt file are prepared!"
 fi
 
