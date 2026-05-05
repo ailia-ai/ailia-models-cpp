@@ -444,7 +444,7 @@ static AILIATensor t2s_forward(AILIATensor ref_seq, AILIATensor text_seq, AILIAT
 		}
 
 		if (benchmark){
-            PRINT_OUT("ailia processing time %lld ms\n",  std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
+            PRINT_OUT("ailia processing time %lld ms\n",  (long long)std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
 		}
 
 		if (stop){
@@ -636,7 +636,7 @@ int main(int argc, char **argv)
 	status = recognize_from_audio(ailia);
 	auto end2 = std::chrono::high_resolution_clock::now();
 	if (benchmark){
-		PRINT_OUT("total processing time %lld ms\n",  std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
+		PRINT_OUT("total processing time %lld ms\n",  (long long)std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
 	}
 
 	for (int i = 0; i < MODEL_N; i++){

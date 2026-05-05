@@ -437,7 +437,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	std::vector< std::vector<float> > embeddings;
 	PRINT_OUT("Calculating embeddings\n");
 	for (int i = 0; i < texts.size(); i++){
-		PRINT_OUT("\r%d/%d", i, texts.size());
+		PRINT_OUT("\r%d/%zu", i, texts.size());
 		fflush(stdout);
 		std::vector<float> embedding = calc_embedding(net, tokenizer, texts[i], false);
 		embeddings.push_back(embedding);

@@ -137,7 +137,7 @@ static int argument_parser(int argc, char **argv)
 void verify_output(std::vector<std::string> prons, std::vector<std::string> expect){
 	if (expect.size() > 0){
 		if (expect.size() != prons.size()){
-			PRINT_OUT("Invalid out token length %d vs %d\n", expect.size(), prons.size());
+			PRINT_OUT("Invalid out token length %zu vs %zu\n", expect.size(), prons.size());
 			throw("verify error");
 		}
 		for (int i = 0; i < prons.size(); i++){
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 		std::vector<std::string> prons = model.compute(reference_text);
 		auto end2 = std::chrono::high_resolution_clock::now();
 		if (benchmark){
-			PRINT_OUT("total processing time %lld ms\n",  std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
+			PRINT_OUT("total processing time %lld ms\n",  (long long)std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
 		}
 
 		PRINT_OUT("Output :\n");
