@@ -102,14 +102,14 @@ int main(int argc, char *argv[]){
 
 	// Open GPT-SoVITS V2-Pro model files
 	status = ailiaVoiceOpenGPTSoVITSV2ProModelFileA(net,
-		"./gpt-sovits-v2-pro/t2s_encoder.onnx",
-		"./gpt-sovits-v2-pro/t2s_fsdec.onnx",
-		"./gpt-sovits-v2-pro/t2s_sdec.opt.onnx",
-		"./gpt-sovits-v2-pro/cnhubert.onnx",
-		"./gpt-sovits-v2-pro/vits.onnx",
-		"./gpt-sovits-v2-pro/sv.onnx",
-		"./gpt-sovits-v2-pro/chinese-roberta.onnx",
-		"./gpt-sovits-v2-pro/vocab.txt");
+		"./onnx/gpt-sovits-v2-pro/t2s_encoder.onnx",
+		"./onnx/gpt-sovits-v2-pro/t2s_fsdec.onnx",
+		"./onnx/gpt-sovits-v2-pro/t2s_sdec.opt.onnx",
+		"./onnx/gpt-sovits-v2-pro/cnhubert.onnx",
+		"./onnx/gpt-sovits-v2-pro/vits.onnx",
+		"./onnx/gpt-sovits-v2-pro/sv.onnx",
+		"./onnx/gpt-sovits-v2-pro/chinese-roberta.onnx",
+		"./onnx/gpt-sovits-v2-pro/vocab.txt");
 	if (status != AILIA_STATUS_SUCCESS){
 		printf("ailiaVoiceOpenGPTSoVITSV2ProModelFileA error %d\n", status);
 		if (status == AILIA_STATUS_LICENSE_NOT_FOUND){

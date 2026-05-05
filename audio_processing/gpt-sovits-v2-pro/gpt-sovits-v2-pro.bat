@@ -13,13 +13,13 @@ set G2PW_DATA_FILES=polyphonic.rep polyphonic-fix.rep
 
 rem download
 if not "%1" == "-h" if not "%1" == "--help" (
-    if not exist gpt-sovits-v2-pro (
-        mkdir gpt-sovits-v2-pro
+    if not exist onnx\gpt-sovits-v2-pro (
+        mkdir onnx\gpt-sovits-v2-pro
     )
     for %%f in (%GPT_SOVITS_V2_PRO_FILES%) do (
-        if not exist gpt-sovits-v2-pro\%%f (
-            echo Downloading model file... ^(save path: gpt-sovits-v2-pro\%%f^)
-            curl https://storage.googleapis.com/ailia-models/%MODEL%/%%f -o gpt-sovits-v2-pro\%%f
+        if not exist onnx\gpt-sovits-v2-pro\%%f (
+            echo Downloading model file... ^(save path: onnx\gpt-sovits-v2-pro\%%f^)
+            curl https://storage.googleapis.com/ailia-models/%MODEL%/%%f -o onnx\gpt-sovits-v2-pro\%%f
         )
     )
 

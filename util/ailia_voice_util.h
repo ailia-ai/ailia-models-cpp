@@ -3,7 +3,7 @@
 *    DESCRIPTION:
 *      ailia Voice Util
 *    AUTHOR:
-*      ax Inc.
+*      ailia Inc.
 *    DATE:2026/05/04
 *
 *******************************************************************/

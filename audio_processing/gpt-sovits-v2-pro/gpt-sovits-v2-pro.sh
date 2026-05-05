@@ -11,11 +11,11 @@ G2PW_DATA_FILES=(polyphonic.rep polyphonic-fix.rep)
 
 # download
 if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
-    mkdir -p gpt-sovits-v2-pro
+    mkdir -p onnx/gpt-sovits-v2-pro
     for f in "${GPT_SOVITS_V2_PRO_FILES[@]}"; do
-        if [ ! -e gpt-sovits-v2-pro/${f} ]; then
-            echo "Downloading model file... save path: gpt-sovits-v2-pro/${f}"
-            curl https://storage.googleapis.com/ailia-models/${MODEL}/${f} -o gpt-sovits-v2-pro/${f}
+        if [ ! -e onnx/gpt-sovits-v2-pro/${f} ]; then
+            echo "Downloading model file... save path: onnx/gpt-sovits-v2-pro/${f}"
+            curl https://storage.googleapis.com/ailia-models/${MODEL}/${f} -o onnx/gpt-sovits-v2-pro/${f}
         fi
     done
 
