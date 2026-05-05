@@ -12,6 +12,11 @@ project(samples C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# When ON, skip every sample that requires OpenCV. Useful when only
+# audio/NLP samples (whisper, gpt-sovits-v2-pro, etc.) are needed and
+# OpenCV is unavailable on the build host.
+option(WITHOUT_OPENCV "Skip samples that require OpenCV" OFF)
+
 set(AILIA_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/ailia/library)
 set(AILIA_TOKENIZER_PATH ${CMAKE_SOURCE_DIR}/ailia_tokenizer/library)
 set(AILIA_AUDIO_PATH ${CMAKE_SOURCE_DIR}/ailia_audio/library)
@@ -31,30 +36,33 @@ else(UNIX)
     set (LIBRARY_PATH ${AILIA_LIBRARY_PATH}/linux/x64 ${AILIA_AUDIO_PATH}/linux/x64 ${AILIA_TOKENIZER_PATH}/linux/x64 ${AILIA_SPEECH_PATH}/linux/x64 ${AILIA_VOICE_PATH}/linux/x64)
 endif(WIN32)
 
-# require ailia SDK and ailia Audio
+# require ailia SDK and ailia Audio (no OpenCV)
 add_subdirectory(audio_processing/silero-vad)
 add_subdirectory(audio_processing/gpt-sovits)
 
-add_subdirectory(background_removal/u2net)
-
-add_subdirectory(image_classification/resnet50)
-add_subdirectory(image_classification/clip)
-
-add_subdirectory(face_detection/yolov3-face)
-add_subdirectory(face_detection/retinaface)
-
-add_subdirectory(face_identification/arcface)
-
-add_subdirectory(face_recognition/face_alignment)
-add_subdirectory(face_recognition/mediapipe_iris)
-
 add_subdirectory(natural_language_processing/g2p_en)
 
-add_subdirectory(object_detection/yolov3-tiny)
-add_subdirectory(object_detection/yolox)
-add_subdirectory(object_detection/m2det)
+# require OpenCV
+if(NOT WITHOUT_OPENCV)
+    add_subdirectory(background_removal/u2net)
 
-add_subdirectory(pose_estimation/lightweight-human-pose-estimation)
+    add_subdirectory(image_classification/resnet50)
+    add_subdirectory(image_classification/clip)
+
+    add_subdirectory(face_detection/yolov3-face)
+    add_subdirectory(face_detection/retinaface)
+
+    add_subdirectory(face_identification/arcface)
+
+    add_subdirectory(face_recognition/face_alignment)
+    add_subdirectory(face_recognition/mediapipe_iris)
+
+    add_subdirectory(object_detection/yolov3-tiny)
+    add_subdirectory(object_detection/yolox)
+    add_subdirectory(object_detection/m2det)
+
+    add_subdirectory(pose_estimation/lightweight-human-pose-estimation)
+endif()
 
 # require ailia Tokenizer and ailia Speech
 if(UNIX AND CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")

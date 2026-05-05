@@ -83,6 +83,13 @@ cmake .
 cmake --build .
 ```
 
+To build only the audio/NLP samples (e.g. whisper and gpt-sovits-v2-pro) without OpenCV, pass `-DWITHOUT_OPENCV=ON`.
+
+```
+cmake -DWITHOUT_OPENCV=ON .
+cmake --build .
+```
+
 ### Run
 
 Move to the model folder, execute sh or bat, then the model file will be downloaded and the model will run.
