@@ -13,3 +13,6 @@
 [submodule "ailia_voice"]
 	path = ailia_voice
 	url = https://github.com/ailia-ai/ailia-voice-cpp.git
+[submodule "ailia_tracker"]
+	path = ailia_tracker
+	url = https://github.com/ailia-ai/ailia-tracker-cpp.git

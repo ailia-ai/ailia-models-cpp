@@ -19,6 +19,7 @@ DYLIB_PATHS=(
     "${ROOT_DIR}/ailia_tokenizer/library/mac"
     "${ROOT_DIR}/ailia_speech/library/mac"
     "${ROOT_DIR}/ailia_voice/library/mac"
+    "${ROOT_DIR}/ailia_tracker/library/mac"
 )
 
 for path in "${DYLIB_PATHS[@]}"; do
