@@ -72,6 +72,10 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ] && [ $status -eq 0 ]; then
         curl https://storage.googleapis.com/ailia-models/${MODEL}/${FILE2} -o ${FILE2}
 #        wget https://storage.googleapis.com/ailia-models/${MODEL}/${FILE2}
     fi
+    if [ ! -e input.png ]; then
+        echo "Downloading sample image file... save path: input.png"
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/background_removal/u2net/input.png -o input.png
+    fi
     echo "ONNX file and Prototxt file are prepared!"
 fi
 

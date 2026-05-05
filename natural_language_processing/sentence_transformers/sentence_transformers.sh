@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MODEL="sentence-transformers-japanese"
-EXE="sentence-transformers"
+EXE="sentence_transformers"
 FILE1="paraphrase-multilingual-mpnet-base-v2.onnx"
 FILE2="paraphrase-multilingual-mpnet-base-v2.onnx.prototxt"
 FILE3="sentencepiece.bpe.model"

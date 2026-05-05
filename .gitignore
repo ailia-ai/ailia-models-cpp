@@ -58,6 +58,17 @@ output.png
 /natural_language_processing/sentence_transformers/sentencepiece.bpe.model
 /natural_language_processing/t5_whisper_medical/spiece.model
 
+# sample inputs downloaded by sample .sh scripts
+/audio_processing/silero-vad/en_example.wav
+/background_removal/u2net/input.png
+/face_detection/yolov3-face/couple.jpg
+/face_identification/arcface/correct_pair_1.jpg
+/face_identification/arcface/correct_pair_2.jpg
+/face_recognition/face_alignment/aflw-test.jpg
+/face_recognition/mediapipe_iris/man.jpg
+/object_detection/yolov3-tiny/couple.jpg
+/pose_estimation/lightweight-human-pose-estimation/balloon.png
+
 # ailia Voice / GPT-SoVITS sample data
 /audio_processing/gpt-sovits-v2-pro/gpt-sovits-v2-pro
 /audio_processing/gpt-sovits-v2-pro/onnx/
