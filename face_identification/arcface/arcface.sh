@@ -82,5 +82,16 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ] && [ $video -eq 1 ] && [ $status -
     echo "ONNX file and Prototxt file are prepared!"
 fi
 
+if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
+    if [ ! -e correct_pair_1.jpg ]; then
+        echo "Downloading sample image file... save path: correct_pair_1.jpg"
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/face_identification/arcface/correct_pair_1.jpg -o correct_pair_1.jpg
+    fi
+    if [ ! -e correct_pair_2.jpg ]; then
+        echo "Downloading sample image file... save path: correct_pair_2.jpg"
+        curl -L https://github.com/ailia-ai/ailia-models/raw/refs/heads/master/face_identification/arcface/correct_pair_2.jpg -o correct_pair_2.jpg
+    fi
+fi
+
 #execute
 ./${MODEL} $*

@@ -15,6 +15,59 @@ ipadic
 # generated artifacts
 /**/build/
 output.wav
+output.png
+/test_logs/
+
+# sample binaries copied next to their .sh launchers by test_all_samples.sh
+/audio_processing/clap/clap
+/audio_processing/gpt-sovits/gpt-sovits
+/audio_processing/silero-vad/silero-vad
+/audio_processing/whisper/whisper
+/background_removal/u2net/u2net
+/face_detection/retinaface/retinaface
+/face_detection/yolov3-face/yolov3-face
+/face_identification/arcface/arcface
+/face_recognition/face_alignment/face_alignment
+/face_recognition/mediapipe_iris/mediapipe_iris
+/image_classification/clip/clip
+/image_classification/resnet50/resnet50
+/natural_language_processing/bert_maskedlm/bert_maskedlm
+/natural_language_processing/fugumt-en-ja/fugumt-en-ja
+/natural_language_processing/fugumt-ja-en/fugumt-ja-en
+/natural_language_processing/g2p_en/g2p_en
+/natural_language_processing/multilingual-e5/multilingual-e5
+/natural_language_processing/sentence_transformers/sentence_transformers
+/natural_language_processing/t5_whisper_medical/t5_whisper_medical
+/object_detection/m2det/m2det
+/object_detection/yolov3-tiny/yolov3-tiny
+/object_detection/yolox/yolox
+/object_detection/yolox_tflite/yolox_tflite
+/object_detection/yolox_tflite/yolox_tiny_full_integer_quant.opt.tflite
+/object_tracking/bytetrack/bytetrack
+/object_tracking/bytetrack/demo.mp4
+/pose_estimation/lightweight-human-pose-estimation/lightweight-human-pose-estimation
+
+# auxiliary data files downloaded by sample .sh scripts
+/natural_language_processing/bert_maskedlm/vocab_wordpiece.txt
+/natural_language_processing/g2p_en/averaged_perceptron_tagger_classes.txt
+/natural_language_processing/g2p_en/averaged_perceptron_tagger_tagdict.txt
+/natural_language_processing/g2p_en/averaged_perceptron_tagger_weights.txt
+/natural_language_processing/g2p_en/cmudict
+/natural_language_processing/g2p_en/homographs.en
+/natural_language_processing/multilingual-e5/sentencepiece.bpe.model
+/natural_language_processing/sentence_transformers/sentencepiece.bpe.model
+/natural_language_processing/t5_whisper_medical/spiece.model
+
+# sample inputs downloaded by sample .sh scripts
+/audio_processing/silero-vad/en_example.wav
+/background_removal/u2net/input.png
+/face_detection/yolov3-face/couple.jpg
+/face_identification/arcface/correct_pair_1.jpg
+/face_identification/arcface/correct_pair_2.jpg
+/face_recognition/face_alignment/aflw-test.jpg
+/face_recognition/mediapipe_iris/man.jpg
+/object_detection/yolov3-tiny/couple.jpg
+/pose_estimation/lightweight-human-pose-estimation/balloon.png
 
 # ailia Voice / GPT-SoVITS sample data
 /audio_processing/gpt-sovits-v2-pro/gpt-sovits-v2-pro

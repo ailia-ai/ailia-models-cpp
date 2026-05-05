@@ -1,6 +1,7 @@
 #!/bin/bash
 
 MODEL="fugumt"
+EXE="fugumt-en-ja"
 FILE1="seq2seq-lm-with-past.onnx"
 FILE2="seq2seq-lm-with-past.onnx.prototxt"
 FILE3="source.spm"
@@ -34,4 +35,4 @@ if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
     echo "SPM files are prepared!"
 fi
 #execute
-./${MODEL} $*
+./${EXE} $*
