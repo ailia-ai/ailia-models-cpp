@@ -311,7 +311,7 @@ static std::vector<float> image_embedding(AILIANetwork *image_enc, std::string p
         return features;
     }
 
-    status = ailiaPredict(image_enc, &features[0], features.size() * sizeof(float), &input_img[0], input_img.size() * sizeof(float));
+    status = ailiaPredict(image_enc, &features[0], (unsigned int)(features.size() * sizeof(float)), &input_img[0], (unsigned int)(input_img.size() * sizeof(float)));
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ImageEmbedding ailiaPredict failed %d\n", status);
         return features;

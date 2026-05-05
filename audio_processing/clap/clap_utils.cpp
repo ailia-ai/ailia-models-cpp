@@ -25,7 +25,7 @@ static std::vector<float> get_mel_ailia(std::vector<float>& audio_data, const AU
     int frame_n;
     std::vector<float> mel;
     
-    status = ailiaAudioGetFrameLen(&frame_n, audio_data.size(), audio_cfg.window_size, audio_cfg.hop_size, center);
+    status = ailiaAudioGetFrameLen(&frame_n, (int)audio_data.size(), audio_cfg.window_size, audio_cfg.hop_size, center);
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ailiaAudioGetFrameLen failed %d\n", status);
         return mel;

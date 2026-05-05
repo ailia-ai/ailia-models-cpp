@@ -364,13 +364,13 @@ static int detect_objects(const cv::Mat& img, AILIANetwork *detector, ioIndices 
         return -1;
     }
 
-    status = ailiaGetBlobData(detector, &dst0[0], dst0.size()*sizeof(float), io_inds.out0);
+    status = ailiaGetBlobData(detector, &dst0[0], (unsigned int)(dst0.size()*sizeof(float)), io_inds.out0);
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ailiaGetBlobData failed %d\n", status);
         return -1;
     }
 
-    status = ailiaGetBlobData(detector, &dst1[0], dst1.size()*sizeof(float), io_inds.out1);
+    status = ailiaGetBlobData(detector, &dst1[0], (unsigned int)(dst1.size()*sizeof(float)), io_inds.out1);
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ailiaGetBlobData failed %d\n", status);
         return -1;

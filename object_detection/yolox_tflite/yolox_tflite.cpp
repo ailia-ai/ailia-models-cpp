@@ -85,12 +85,7 @@ struct Detection {
 // ======================
 
 static int load_file(std::vector<uint8_t>& buf, const char* path) {
-    FILE* fp = NULL;
-#if defined(_WIN32) || defined(_WIN64)
-    if (fopen_s(&fp, path, "rb") != 0) return -1;
-#else
-    fp = fopen(path, "rb");
-#endif
+    FILE* fp = fopen(path, "rb");
     if (!fp) return -1;
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);

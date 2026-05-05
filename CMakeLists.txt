@@ -12,6 +12,14 @@ project(samples C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(MSVC)
+    # Silence the C4996 deprecation warnings for the standard CRT (fopen,
+    # sprintf, etc.) that MSVC tags as "unsafe". The samples use the
+    # portable C API on purpose so that the same source builds on every
+    # platform.
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 # When OFF, skip every sample that requires OpenCV. Useful when only
 # audio/NLP samples (whisper, gpt-sovits-v2-pro, etc.) are needed and
 # OpenCV is unavailable on the build host.

@@ -100,7 +100,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 			setErrorDetail("ailiaSetInputBlobShape",ailiaGetErrorDetail(ailia));
 		}
 
-		status = ailiaSetInputBlobData(ailia, &(inputs[i]->data)[0], inputs[i]->data.size() * sizeof(float), input_blob_idx);
+		status = ailiaSetInputBlobData(ailia, &(inputs[i]->data)[0], (unsigned int)(inputs[i]->data.size() * sizeof(float)), input_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 		}
@@ -146,7 +146,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		}
 		ref_tensor.shape = output_blob_shape;
 
-		status = ailiaGetBlobData(ailia, &ref_tensor.data[0], ref_tensor.data.size() * sizeof(float), output_blob_idx);
+		status = ailiaGetBlobData(ailia, &ref_tensor.data[0], (unsigned int)(ref_tensor.data.size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 		}

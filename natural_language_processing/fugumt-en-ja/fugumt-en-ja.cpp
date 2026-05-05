@@ -192,7 +192,7 @@ std::vector<int> encode(std::string text, struct AILIATokenizer *tokenizer){
 }
 
 std::string decode(std::vector<int> &tokens, struct AILIATokenizer *tokenizer){
-	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], tokens.size());
+	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], (unsigned int)tokens.size());
 	if (status != AILIA_STATUS_SUCCESS){
 		setErrorDetail("ailiaTokenizerDecode", "");
 		return std::string("");

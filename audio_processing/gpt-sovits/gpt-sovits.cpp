@@ -197,7 +197,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 			setErrorDetail("ailiaSetInputBlobShape",ailiaGetErrorDetail(ailia));
 		}
 
-		status = ailiaSetInputBlobData(ailia, &(inputs[i]->data)[0], inputs[i]->data.size() * sizeof(float), input_blob_idx);
+		status = ailiaSetInputBlobData(ailia, &(inputs[i]->data)[0], (unsigned int)(inputs[i]->data.size() * sizeof(float)), input_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 		}
@@ -243,7 +243,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		}
 		ref_tensor.shape = output_blob_shape;
 
-		status = ailiaGetBlobData(ailia, &ref_tensor.data[0], ref_tensor.data.size() * sizeof(float), output_blob_idx);
+		status = ailiaGetBlobData(ailia, &ref_tensor.data[0], (unsigned int)(ref_tensor.data.size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 		}
@@ -261,13 +261,13 @@ static std::vector<float> resample(std::vector<float> pcm, int targetSampleRate,
 
 	if(sampleRate != targetSampleRate){
 		int dst_n = 0;
-		int status = ailiaAudioGetResampleLen(&dst_n, targetSampleRate, pcm.size(), sampleRate);
+		int status = ailiaAudioGetResampleLen(&dst_n, targetSampleRate, (int)pcm.size(), sampleRate);
 		if (status != AILIA_STATUS_SUCCESS) {
 			PRINT_ERR("ailiaAudioGetResampleLen failed %d\n", status);
 			throw;
 		}
 		std::vector<float> new_audio_waveform(dst_n);
-		status = ailiaAudioResample(&new_audio_waveform[0], &pcm[0], targetSampleRate, dst_n, sampleRate, pcm.size());
+		status = ailiaAudioResample(&new_audio_waveform[0], &pcm[0], targetSampleRate, dst_n, sampleRate, (int)pcm.size());
 		if (status != AILIA_STATUS_SUCCESS) {
 			PRINT_ERR("ailiaAudioResample failed %d\n", status);
 			throw;
