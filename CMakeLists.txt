@@ -12,10 +12,10 @@ project(samples C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# When ON, skip every sample that requires OpenCV. Useful when only
+# When OFF, skip every sample that requires OpenCV. Useful when only
 # audio/NLP samples (whisper, gpt-sovits-v2-pro, etc.) are needed and
 # OpenCV is unavailable on the build host.
-option(WITHOUT_OPENCV "Skip samples that require OpenCV" OFF)
+option(OPENCV "Build samples that require OpenCV" ON)
 
 set(AILIA_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/ailia/library)
 set(AILIA_TOKENIZER_PATH ${CMAKE_SOURCE_DIR}/ailia_tokenizer/library)
@@ -43,7 +43,7 @@ add_subdirectory(audio_processing/gpt-sovits)
 add_subdirectory(natural_language_processing/g2p_en)
 
 # require OpenCV
-if(NOT WITHOUT_OPENCV)
+if(OPENCV)
     add_subdirectory(background_removal/u2net)
 
     add_subdirectory(image_classification/resnet50)
