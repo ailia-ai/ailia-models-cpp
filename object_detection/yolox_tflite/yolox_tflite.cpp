@@ -371,21 +371,6 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    /* dump device info */
-    {
-        size_t device_count = 0;
-        ailiaTFLiteGetDeviceCount(instance, &device_count);
-        PRINT_OUT("device_count = %d\n", (int)device_count);
-        for (size_t d = 0; d < device_count; ++d) {
-            char* name = NULL;
-            char* info = NULL;
-            ailiaTFLiteGetDeviceName(instance, (int32_t)d, &name);
-            ailiaTFLiteGetDeviceExtraInfo(instance, (int32_t)d, &info);
-            PRINT_OUT("[%zu] name='%s', info='%s'\n", d,
-                      name ? name : "", info ? info : "");
-        }
-    }
-
     ailiaTFLiteAllocateTensors(instance);
 
     int32_t input_tensor_index = 0;
