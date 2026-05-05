@@ -20,7 +20,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     timeout-minutes: 20
 
     steps:
@@ -36,22 +36,22 @@ jobs:
         git submodule update
 
     - name: Download OpenCV
-      run: curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.5.5/opencv-4.5.5-vc14_vc15.exe
+      run: curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
 
     - name: Extract OpenCV
       run: |
         mkdir opencv
         Start-Process -FilePath "opencv.exe" -ArgumentList "-y -o ./opencv" -NoNewWindow -Wait
         echo "OPENCV_PATH=$PWD/opencv/build" >> $env:GITHUB_ENV
-      
+
     - name: Verify OpenCV Extraction
       run: |
         echo "Contents of opencv directory:"
         dir opencv
         echo "Contents of opencv/build directory:"
         dir opencv/build
-        echo "Contents of opencv/build/x64/vc15/bin directory:"
-        dir opencv/build/x64/vc15/bin
+        echo "Contents of opencv/build/x64/vc16/bin directory:"
+        dir opencv/build/x64/vc16/bin
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1

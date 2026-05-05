@@ -10,3 +10,6 @@
 [submodule "ailia_speech"]
 	path = ailia_speech
 	url = https://github.com/ailia-ai/ailia-speech-cpp.git
+[submodule "ailia_voice"]
+	path = ailia_voice
+	url = https://github.com/ailia-ai/ailia-voice-cpp.git
