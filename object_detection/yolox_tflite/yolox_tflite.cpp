@@ -23,6 +23,9 @@
 #include "webcamera_utils.h"
 
 #if defined(_WIN32) || defined(_WIN64)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #define PRINT_OUT(...) fprintf_s(stdout, __VA_ARGS__)
 #define PRINT_ERR(...) fprintf_s(stderr, __VA_ARGS__)
