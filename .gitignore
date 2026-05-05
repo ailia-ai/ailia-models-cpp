@@ -15,6 +15,7 @@ ipadic
 # generated artifacts
 /**/build/
 output.wav
+/test_logs/
 
 # ailia Voice / GPT-SoVITS sample data
 /audio_processing/gpt-sovits-v2-pro/gpt-sovits-v2-pro
