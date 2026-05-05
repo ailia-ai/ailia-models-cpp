@@ -22,35 +22,14 @@
 #include "utils.h"
 #include "webcamera_utils.h"
 
+#include <time.h>
+
 #if defined(_WIN32) || defined(_WIN64)
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
 #define PRINT_OUT(...) fprintf_s(stdout, __VA_ARGS__)
 #define PRINT_ERR(...) fprintf_s(stderr, __VA_ARGS__)
-typedef LARGE_INTEGER ailia_time_t;
-static void get_ailia_time(ailia_time_t *t) {
-    QueryPerformanceCounter(t);
-}
-static int64_t calc_predict_time_us(ailia_time_t start, ailia_time_t finish) {
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq);
-    return (finish.QuadPart - start.QuadPart) * (int64_t)1000000 / freq.QuadPart;
-}
 #else
-#include <time.h>
 #define PRINT_OUT(...) fprintf(stdout, __VA_ARGS__)
 #define PRINT_ERR(...) fprintf(stderr, __VA_ARGS__)
-typedef int64_t ailia_time_t;
-static void get_ailia_time(ailia_time_t *t) {
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
-    *t = now.tv_sec * (int64_t)1000000000 + now.tv_nsec;
-}
-static int64_t calc_predict_time_us(ailia_time_t start, ailia_time_t finish) {
-    return (finish - start) / (int64_t)1000;
-}
 #endif
 
 // ======================
@@ -386,7 +365,7 @@ static int decode_output(struct AILIATFLiteInstance* instance,
 
 static int predict(struct AILIATFLiteInstance* instance, const cv::Mat& bgr,
                    std::vector<Detection>& dets, int& input_w, int& input_h,
-                   int64_t& predict_time_us) {
+                   long& predict_time_ms) {
     int32_t input_tensor_index = 0;
     ailiaTFLiteGetInputTensorIndex(instance, &input_tensor_index, 0);
 
@@ -404,11 +383,10 @@ static int predict(struct AILIATFLiteInstance* instance, const cv::Mat& bgr,
 
     fill_input_tensor(input_tensor_type, input_buffer, input_shape, bgr);
 
-    ailia_time_t start, end;
-    get_ailia_time(&start);
+    clock_t start = clock();
     AILIATFLiteStatus status = ailiaTFLitePredict(instance);
-    get_ailia_time(&end);
-    predict_time_us = calc_predict_time_us(start, end);
+    clock_t end = clock();
+    predict_time_ms = (long)((end - start) * 1000 / CLOCKS_PER_SEC);
     if (status != AILIA_TFLITE_STATUS_SUCCESS) {
         PRINT_ERR("ailiaTFLitePredict failed %d\n", status);
         return -1;
@@ -437,18 +415,18 @@ static int recognize_from_image(struct AILIATFLiteInstance* instance) {
     PRINT_OUT("Start inference...\n");
     std::vector<Detection> dets;
     int input_w = 0, input_h = 0;
-    int64_t predict_us = 0;
+    long predict_ms = 0;
 
     if (benchmark) {
         PRINT_OUT("BENCHMARK mode\n");
         for (int i = 0; i < BENCHMARK_ITERS; i++) {
             dets.clear();
-            if (predict(instance, img, dets, input_w, input_h, predict_us) != 0) return -1;
-            PRINT_OUT("\tailia processing time %lld ms\n", (long long)(predict_us / 1000));
+            if (predict(instance, img, dets, input_w, input_h, predict_ms) != 0) return -1;
+            PRINT_OUT("\tailia processing time %ld ms\n", predict_ms);
         }
     } else {
-        if (predict(instance, img, dets, input_w, input_h, predict_us) != 0) return -1;
-        PRINT_OUT("inference time %lld ms\n", (long long)(predict_us / 1000));
+        if (predict(instance, img, dets, input_w, input_h, predict_ms) != 0) return -1;
+        PRINT_OUT("inference time %ld ms\n", predict_ms);
     }
 
     for (const Detection& d : dets) {
@@ -490,8 +468,8 @@ static int recognize_from_video(struct AILIATFLiteInstance* instance) {
 
         std::vector<Detection> dets;
         int input_w = 0, input_h = 0;
-        int64_t predict_us = 0;
-        if (predict(instance, frame, dets, input_w, input_h, predict_us) != 0) {
+        long predict_ms = 0;
+        if (predict(instance, frame, dets, input_w, input_h, predict_ms) != 0) {
             return -1;
         }
         draw_detections(frame, dets, input_w, input_h);
