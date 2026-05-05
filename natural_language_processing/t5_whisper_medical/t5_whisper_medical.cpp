@@ -328,7 +328,7 @@ int forward_decoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_D
 		if (i == 1){
 			// embeddings
 			sequence_shape.x=768;
-			sequence_shape.y=inputs[i]->size() / 768;
+			sequence_shape.y=(unsigned int)(inputs[i]->size() / 768);
 			sequence_shape.z=batch_size;
 			sequence_shape.w=1;
 			sequence_shape.dim=3;
