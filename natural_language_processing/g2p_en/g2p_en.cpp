@@ -140,9 +140,9 @@ void verify_output(std::vector<std::string> prons, std::vector<std::string> expe
 			PRINT_OUT("Invalid out token length %zu vs %zu\n", expect.size(), prons.size());
 			throw("verify error");
 		}
-		for (int i = 0; i < prons.size(); i++){
+		for (size_t i = 0; i < prons.size(); i++){
 			if (expect[i] != prons[i]){
-				PRINT_OUT("Output token mismatch %s vs %s at %d\n", expect[i].c_str(), prons[i].c_str(), i);
+				PRINT_OUT("Output token mismatch %s vs %s at %zu\n", expect[i].c_str(), prons[i].c_str(), i);
 				throw("verify error");
 			}
 		}
@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 		}
 
 		PRINT_OUT("Output :\n");
-		for (int i = 0; i < prons.size(); i++){
+		for (size_t i = 0; i < prons.size(); i++){
 			PRINT_OUT("%s ", prons[i].c_str());
 		}
 		PRINT_OUT("\n");

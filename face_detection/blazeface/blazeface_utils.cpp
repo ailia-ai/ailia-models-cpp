@@ -577,14 +577,14 @@ static void weighted_non_max_suppression(const std::vector<cv::Mat> &detections,
     float min_suppression_threshold = 0.3f;
 
     std::vector<float> scores;
-    for (int i = 0; i < detections.size(); i++) {
+    for (size_t i = 0; i < detections.size(); i++) {
         float* det_data = (float*)detections[i].data;
         scores.push_back(det_data[16]);
     }
 
     // Sort the scores from highest to lowest score.
-    cv::Mat mat_scores    = cv::Mat_<float>(1, scores.size(), &scores[0]);
-    cv::Mat mat_remaining = cv::Mat_<int>(1, scores.size());
+    cv::Mat mat_scores    = cv::Mat_<float>(1, (int)scores.size(), &scores[0]);
+    cv::Mat mat_remaining = cv::Mat_<int>(1, (int)scores.size());
     cv::sortIdx(mat_scores, mat_remaining, cv::SORT_EVERY_ROW|cv::SORT_DESCENDING);
     std::vector<int> remaining;
     remaining.insert(remaining.end(), (int*)mat_remaining.data, (int*)mat_remaining.data+mat_remaining.cols);
@@ -596,8 +596,8 @@ static void weighted_non_max_suppression(const std::vector<cv::Mat> &detections,
         // remaining boxes. (Note that the other_boxes also include
         // the first_box.)
         cv::Mat first_box = detection.colRange(cv::Range(0, 4));
-        cv::Mat other_boxes = cv::Mat(remaining.size(), 4, CV_32FC1);
-        for (int i = 0; i < remaining.size(); i++) {
+        cv::Mat other_boxes = cv::Mat((int)remaining.size(), 4, CV_32FC1);
+        for (size_t i = 0; i < remaining.size(); i++) {
             cv::Rect roi(0, i, 4, 1);
             detections[remaining[i]].colRange(cv::Range(0, 4)).copyTo(other_boxes(roi));
         }
@@ -624,7 +624,7 @@ static void weighted_non_max_suppression(const std::vector<cv::Mat> &detections,
         if (overlapping.size() > 1) {
             float total_score = 0.0f;
             cv::Mat sum_coordinate = cv::Mat(1, 16, CV_32FC1, 0.0f);
-            for (int i = 0; i < overlapping.size(); i++) {
+            for (size_t i = 0; i < overlapping.size(); i++) {
                 float* det_data = (float*)detections[overlapping[i]].data;
                 float score = det_data[16];
                 total_score += score;

@@ -326,7 +326,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	std::vector<float> past_key_values[NUM_PAST_KEY];
 
 	PRINT_OUT("Input Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		input_ids[i] = (float)tokens[i];
 		attention_mask[i] = 1;
 		PRINT_OUT("%d ", (int)input_ids[i]);
@@ -376,7 +376,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 
 		float prob = -INFINITY;
 		int arg_max = 0;
-		for (int i = 0; i < logits.size(); i++){
+		for (size_t i = 0; i < logits.size(); i++){
 			//PRINT_OUT("%f ", logits[i]);
 			if (prob < logits[i]){
 				prob = logits[i];
@@ -404,7 +404,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	PRINT_OUT("Output : %s\n",text.c_str());
 
 	PRINT_OUT("Output Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		PRINT_OUT("%d ", tokens[i]);
 	}
 	PRINT_OUT("\n");

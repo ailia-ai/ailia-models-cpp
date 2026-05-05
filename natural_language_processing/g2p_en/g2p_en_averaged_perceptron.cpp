@@ -106,19 +106,19 @@ unordered_map<string, int> AveragedPerceptron::_get_features(int i, const string
 	add("i-2 tag", { prev2 });
 	add("i tag+i-2 tag", { prev, prev2 });
 	
-	if (i < context.size()) add("i word", { context[i] });
-	if (i < context.size()) add("i-1 tag+i word", { prev, context[i] });
-	if (i - 1 >= 0 && i - 1 < context.size()) add("i-1 word", { context[i - 1] });
-	if (i - 1 >= 0 && i - 1 < context.size() && context[i - 1].size() >= 3) 
+	if (i < (int)context.size()) add("i word", { context[i] });
+	if (i < (int)context.size()) add("i-1 tag+i word", { prev, context[i] });
+	if (i - 1 >= 0 && i - 1 < (int)context.size()) add("i-1 word", { context[i - 1] });
+	if (i - 1 >= 0 && i - 1 < (int)context.size() && context[i - 1].size() >= 3) 
 		add("i-1 suffix", { context[i - 1].substr(context[i - 1].size() - 3) });
-	else if (i - 1 >= 0 && i - 1 < context.size())
+	else if (i - 1 >= 0 && i - 1 < (int)context.size())
 		add("i-1 suffix", { context[i - 1] });
 	
-	if (i - 2 >= 0 && i - 2 < context.size()) add("i-2 word", { context[i - 2] });
-	if (i + 1 < context.size()) add("i+1 word", { context[i + 1] });
-	if (i + 1 < context.size() && context[i + 1].size() >= 3) 
+	if (i - 2 >= 0 && i - 2 < (int)context.size()) add("i-2 word", { context[i - 2] });
+	if (i + 1 < (int)context.size()) add("i+1 word", { context[i + 1] });
+	if (i + 1 < (int)context.size() && context[i + 1].size() >= 3) 
 		add("i+1 suffix", { context[i + 1].substr(context[i + 1].size() - 3) });
-	else if (i + 1 < context.size())
+	else if (i + 1 < (int)context.size())
 		add("i+1 suffix", { context[i + 1] });
 
 	return features;
@@ -149,7 +149,7 @@ vector<pair<string, string>> AveragedPerceptron::tag(const vector<string>& token
 	}
 	context.insert(context.end(), END.begin(), END.end());
 
-	for (int i = 0; i < tokens.size(); ++i) {
+	for (size_t i = 0; i < tokens.size(); ++i) {
 		string word = tokens[i];
 		string tag;
 		if (tagdict.find(word) != tagdict.end()) {
@@ -181,7 +181,7 @@ void test_averaged_perceptron() {
 	expect.push_back(pair<string, string>({"activationist", "NN"}));
 	expect.push_back(pair<string, string>({".", "."}));
 
-	for (int i = 0; i < expect.size(); i++){
+	for (size_t i = 0; i < expect.size(); i++){
 		if (output[i] != expect[i]){
 			for (const auto& pair : output) {
 				cout << "(" << pair.first << ", " << pair.second << "), ";

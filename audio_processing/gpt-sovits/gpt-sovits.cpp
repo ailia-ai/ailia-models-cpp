@@ -181,7 +181,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		setErrorDetail("input blob cnt and input tensor size must be same", "");
 	}
 
-	for (int i = 0; i < inputs.size(); i++){
+	for (size_t i = 0; i < inputs.size(); i++){
 		unsigned int input_blob_idx = 0;
 		status = ailiaGetBlobIndexByInputIndex(ailia, &input_blob_idx, i);
 		if (status != AILIA_STATUS_SUCCESS) {
@@ -214,7 +214,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		setErrorDetail("ailiaGetOutputBlobCount",ailiaGetErrorDetail(ailia));
 	}
 
-	for (int i = 0; i < output_blob_cnt; i++){
+	for (size_t i = 0; i < output_blob_cnt; i++){
 		unsigned int output_blob_idx = 0;
 		status = ailiaGetBlobIndexByOutputIndex(ailia, &output_blob_idx, i);
 		if (status != AILIA_STATUS_SUCCESS) {
@@ -238,7 +238,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		
 		AILIATensor &ref_tensor = outputs[i];
 		int new_shape = output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w;
-		if (new_shape != ref_tensor.data.size()){
+		if ((size_t)new_shape != ref_tensor.data.size()){
 			ref_tensor.data.resize(new_shape);
 		}
 		ref_tensor.shape = output_blob_shape;
@@ -253,7 +253,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 static std::vector<float> resample(std::vector<float> pcm, int targetSampleRate, int sampleRate, int nChannels)
 {
 	if (nChannels == 2){
-		for (int i = 0; i < pcm.size() / 2; i++){
+		for (size_t i = 0; i < pcm.size() / 2; i++){
 			pcm[i] = (pcm[i*2] + pcm[i*2+1])/2;
 		}
 		pcm.resize(pcm.size() / 2);
@@ -316,7 +316,7 @@ static AILIATensor ssl_forward(std::vector<float> ref_audio_16k, AILIANetwork* n
 int argmax(AILIATensor logits){
 	float max_p = 0.0f;
 	int max_i = 0;
-	for (int i = 0; i < logits.data.size(); i++){
+	for (size_t i = 0; i < logits.data.size(); i++){
 		if (logits.data[i] > max_p){
 			max_p = logits.data[i];
 			max_i = i;
@@ -431,7 +431,7 @@ static AILIATensor t2s_forward(AILIATensor ref_seq, AILIATensor text_seq, AILIAT
 		AILIATensor& samples = decoder_outputs[5];
 
 		bool stop = false;
-		if (early_stop_num != -1 && y.shape.x - prefix_len > early_stop_num){
+		if (early_stop_num != -1 && (int)(y.shape.x - prefix_len) > early_stop_num){
 			stop = true;
 		}
 		int token = argmax(logits);
@@ -475,7 +475,7 @@ AILIATensor vits_forward(AILIATensor text_seq, AILIATensor pred_semantic, AILIAT
 
 static int recognize_from_audio(AILIANetwork* net[MODEL_N])
 {
-	int status = AILIA_STATUS_SUCCESS;
+	// unused: int status = AILIA_STATUS_SUCCESS;
 
 	int sampleRate, nChannels, nSamples;
 	std::vector<float> wave = read_wave_file(reference_wave.c_str(), &sampleRate, &nChannels, &nSamples);

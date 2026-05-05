@@ -406,12 +406,12 @@ static int recognize_from_text(AILIANetwork* encoder, AILIANetwork* decoder, str
 	}
 
 	std::vector<float> input_ids(input_text_tokens.size());
-	for (int i = 0; i < input_text_tokens.size(); i++){
+	for (size_t i = 0; i < input_text_tokens.size(); i++){
 		input_ids[i] = (float)input_text_tokens[i];
 	}
 
 	PRINT_OUT("Input Tokens :\n");
-	for (int i = 0; i < input_ids.size(); i++){
+	for (size_t i = 0; i < input_ids.size(); i++){
 		PRINT_OUT("%d ", (int)input_ids[i]);
 	}
 	PRINT_OUT("\n");
@@ -427,7 +427,7 @@ static int recognize_from_text(AILIANetwork* encoder, AILIANetwork* decoder, str
 		return status;
 	}
 
-	int num_beams = 1;
+	// unused: int num_beams = 1;
 	std::vector<int> tokens_int;
 	std::vector<float> tokens;
 
@@ -499,7 +499,7 @@ static int recognize_from_text(AILIANetwork* encoder, AILIANetwork* decoder, str
 	PRINT_OUT("Output : %s\n",text.c_str());
 
 	PRINT_OUT("Output Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		PRINT_OUT("%d ", (int)tokens[i]);
 	}
 	PRINT_OUT("\n");

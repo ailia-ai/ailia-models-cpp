@@ -417,7 +417,7 @@ vector<FaceInfo> post_process(const vector<float>& box_data, const vector<float>
     vector<vector<float>> scaled_landmarks = scale(landmarks, landmark_scale);
 
     vector<int> inds;
-    for (int i = 0; i < scores.size(); i++) {
+    for (size_t i = 0; i < scores.size(); i++) {
         if (scores[i] > CONFIDENCE_THRES) {
             inds.push_back(i);
         }
@@ -602,13 +602,13 @@ int plot_result_retinaface(std::vector<FaceInfo> info, cv::Mat& img, bool loggin
         PRINT_OUT("object_count=%d\n", (int)info.size());
     }
 
-    for (int i = 0; i < info.size(); i++) {
+    for (size_t i = 0; i < info.size(); i++) {
         FaceInfo obj = info[i];
         if (obj.score < VIS_THRES){
             continue;
         }
         if (logging){
-            PRINT_OUT("+ idx=%d\n  score=%.15f\n  x=%.15f\n  y=%.15f\n  w=%.15f\n  h=%.15f\n",
+            PRINT_OUT("+ idx=%zu\n  score=%.15f\n  x=%.15f\n  y=%.15f\n  w=%.15f\n  h=%.15f\n",
                         i, obj.score, obj.center.first, obj.center.second, obj.width, obj.height);
         }
 
@@ -618,7 +618,7 @@ int plot_result_retinaface(std::vector<FaceInfo> info, cv::Mat& img, bool loggin
 
         // update image
         cv::Scalar color = hsv_to_rgb(256*((float)i/(float)info.size()), 255, 255);
-        float fontScale = (float)img.cols / 512.0f;
+        // unused: float fontScale = (float)img.cols / 512.0f;
         cv::rectangle(img, top_left, bottom_right, color, 4);
     }
 
@@ -792,7 +792,7 @@ int main(int argc, char **argv)
         ailiaDestroy(ailia);
         return -1;
     }
-    const unsigned int flags = AILIA_DETECTOR_FLAG_NORMAL;
+    // unused: const unsigned int flags = AILIA_DETECTOR_FLAG_NORMAL;
 
     if (video_mode) {
         status = recognize_from_video(ailia);

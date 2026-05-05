@@ -204,7 +204,7 @@ void softmax(float *data, int n){
 
 float norm(std::vector<float> & vec1){
 	float norm1 = 0;
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		norm1 += vec1[i] * vec1[i];
 	}
 	norm1 = sqrt(norm1);
@@ -215,7 +215,7 @@ float cos_similarity(std::vector<float> & vec1, std::vector<float> & vec2){
 	float sum = 0;
 	float norm1 = norm(vec1);
 	float norm2 = norm(vec2);
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		sum += (vec1[i] / norm1) * (vec2[i] / norm2);
 	}
 	return sum;
@@ -335,7 +335,7 @@ std::vector<int> tokenize(AILIATokenizer * tokenizer, std::string text){
 	ailiaTokenizerGetTokens(tokenizer, &tokens[0], count);
     std::vector<int> pad_tokens(CONTEXT_LENGTH);
     for (int i = 0; i < CONTEXT_LENGTH; i++){
-        if (i < tokens.size()){
+        if ((size_t)i < tokens.size()){
             pad_tokens[i] = tokens[i];
             if (i == CONTEXT_LENGTH - 1){
                 pad_tokens[i] = tokens[tokens.size() - 1]; // SOT
@@ -346,7 +346,7 @@ std::vector<int> tokenize(AILIATokenizer * tokenizer, std::string text){
     }
     if (debug){
         printf("Tokens : ");
-        for (int i = 0; i < pad_tokens.size(); i++){
+        for (size_t i = 0; i < pad_tokens.size(); i++){
             printf("%d ", pad_tokens[i]);
         }
         printf("\n");
@@ -411,7 +411,7 @@ int get_env_id(void)
 	for (unsigned int i = 0; i < env_count; i++) {
 		AILIAEnvironment* env;
 		status = ailiaGetEnvironment(&env, i, AILIA_ENVIRONMENT_VERSION);
-		bool is_fp16 = (env->props & AILIA_ENVIRONMENT_PROPERTY_FP16) != 0;
+		// unused: bool is_fp16 = (env->props & AILIA_ENVIRONMENT_PROPERTY_FP16) != 0;
 		PRINT_OUT("env_id : %d type : %d name : %s", env->id, env->type, env->name);
 		PRINT_OUT("\n");
 		if (args_env_id == env->id){
@@ -511,7 +511,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
     PRINT_OUT("Tokenize...\n");
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         std::vector<int>  token = tokenize(tokenizer, texts[i]);
         tokens.push_back(token);
     }
@@ -520,7 +520,7 @@ int main(int argc, char **argv)
     // text embedding
     PRINT_OUT("Text embedding...\n");
     std::vector< std::vector<float> > text_features;
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         std::vector<float> features = text_embedding(ailia_text, tokens[i]);
         text_features.push_back(features);
     }
@@ -533,7 +533,7 @@ int main(int argc, char **argv)
     PRINT_OUT("Similarity...\n");
     std::vector<float> confs;
     std::vector<float> sims;
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         float sim = cos_similarity(image_features, text_features[i]);
         confs.push_back(sim * 100);
         sims.push_back(sim);
@@ -541,7 +541,7 @@ int main(int argc, char **argv)
 
     softmax(&confs[0], confs.size());
 
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         printf("Label %s Confidence %f Similarity %f\n", texts[i].c_str(), confs[i], sims[i]);
     }
 

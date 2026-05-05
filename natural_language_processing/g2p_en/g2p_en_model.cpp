@@ -84,7 +84,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		setErrorDetail("input blob cnt and input tensor size must be same", "");
 	}
 
-	for (int i = 0; i < inputs.size(); i++){
+	for (size_t i = 0; i < inputs.size(); i++){
 		unsigned int input_blob_idx = 0;
 		status = ailiaGetBlobIndexByInputIndex(ailia, &input_blob_idx, i);
 		if (status != AILIA_STATUS_SUCCESS) {
@@ -117,7 +117,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		setErrorDetail("ailiaGetOutputBlobCount",ailiaGetErrorDetail(ailia));
 	}
 
-	for (int i = 0; i < output_blob_cnt; i++){
+	for (size_t i = 0; i < output_blob_cnt; i++){
 		unsigned int output_blob_idx = 0;
 		status = ailiaGetBlobIndexByOutputIndex(ailia, &output_blob_idx, i);
 		if (status != AILIA_STATUS_SUCCESS) {
@@ -141,7 +141,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 		
 		AILIATensor &ref_tensor = outputs[i];
 		int new_shape = output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w;
-		if (new_shape != ref_tensor.data.size()){
+		if ((size_t)new_shape != ref_tensor.data.size()){
 			ref_tensor.data.resize(new_shape);
 		}
 		ref_tensor.shape = output_blob_shape;
@@ -329,7 +329,7 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 	std::vector<int> x = tokenize(word);
 	if (debug){
 		PRINT_OUT("tokens : ");
-		for (int i = 0; i < x.size(); i++){
+		for (size_t i = 0; i < x.size(); i++){
 			PRINT_OUT("%d ", x[i]);
 		}
 		PRINT_OUT("\n");
@@ -345,7 +345,7 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 	h_tensor.shape.w = 1;
 	h_tensor.shape.dim = 2;
 
-	for (int i = 0; i < x.size(); i++){
+	for (size_t i = 0; i < x.size(); i++){
 		std::vector<float> x_data(1);
 		x_data[0] = x[i];
 
@@ -393,7 +393,7 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 		h_tensor = decoder_outputs[1];
 
 		float max_logits = -1;
-		for (int i = 0; i < logits_tensor.shape.x; i++){
+		for (size_t i = 0; i < logits_tensor.shape.x; i++){
 			if (max_logits < logits_tensor.data[i]){
 				max_logits = logits_tensor.data[i];
 				pred = i;
@@ -409,7 +409,7 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 
 	if (debug){
 		PRINT_OUT("output\n");
-		for (int i = 0; i < preds.size(); i++){
+		for (size_t i = 0; i < preds.size(); i++){
 			PRINT_OUT("%d ", preds[i]);
 		}
 		PRINT_OUT("\n");
@@ -515,7 +515,7 @@ std::vector<std::string> G2PEnModel::compute(std::string text)
 			pron = predict(word);
 		}
 
-		for (int i = 0; i < pron.size(); i++) {
+		for (size_t i = 0; i < pron.size(); i++) {
 			prons.push_back(pron[i]);
 		}
 		prons.push_back(" ");

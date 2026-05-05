@@ -213,7 +213,7 @@ static int display_result(cv::Mat& img, AILIAPoseEstimator* pose, bool logging =
         PRINT_OUT("person_count=%d\n", obj_count);
     }
 
-    for (int i = 0; i < obj_count ;i++) {
+    for (size_t i = 0; i < obj_count ;i++) {
         AILIAPoseEstimatorObjectPose person;
         status = ailiaPoseEstimatorGetObjectPose(pose, &person, i, AILIA_POSE_ESTIMATOR_OBJECT_POSE_VERSION);
         if (status != AILIA_STATUS_SUCCESS) {
@@ -403,14 +403,14 @@ int main(int argc, char **argv)
         return -1;
     }
     int env_id = AILIA_ENVIRONMENT_ID_AUTO;
-    for (int i = 0; i < env_count; i++) {
+    for (size_t i = 0; i < env_count; i++) {
         AILIAEnvironment* env_ptr = nullptr;
         status = ailiaGetEnvironment(&env_ptr, i, AILIA_ENVIRONMENT_VERSION);
         if(status != AILIA_STATUS_SUCCESS) {
             PRINT_ERR("ailiaGetEnvironment failed %d\n", status);
             return -1;
         }
-        PRINT_OUT("idx:%d name:%s type:%d\n", i, env_ptr->name, env_ptr->type);
+        PRINT_OUT("idx:%zu name:%s type:%d\n", i, env_ptr->name, env_ptr->type);
         if (env_ptr->type == AILIA_ENVIRONMENT_TYPE_GPU) {
             env_id = env_ptr->id;
         }

@@ -61,7 +61,7 @@ int plot_result(AILIADetector* detector, cv::Mat& img, const std::vector<const c
         PRINT_OUT("object_count=%d\n", obj_count);
     }
 
-    for (int i = 0; i < obj_count; i++) {
+    for (unsigned int i = 0; i < obj_count; i++) {
         AILIADetectorObject obj;
         // print result
         status = ailiaDetectorGetObject(detector, &obj, i, AILIA_DETECTOR_OBJECT_VERSION);
@@ -79,7 +79,7 @@ int plot_result(AILIADetector* detector, cv::Mat& img, const std::vector<const c
         cv::Point text_position((int)(img.cols*obj.x)+4, (int)(img.rows*(obj.y+obj.h)-8));
 
         // update image
-        cv::Scalar color = hsv_to_rgb(256*((float)obj.category/(float)category.size()), 255, 255);
+        cv::Scalar color = hsv_to_rgb((int)(256*((float)obj.category/(float)category.size())), 255, 255);
         float fontScale = (float)img.cols / 512.0f;
         cv::rectangle(img, top_left, bottom_right, color, 4);
         cv::putText(img, category[obj.category], text_position, cv::FONT_HERSHEY_SIMPLEX, fontScale, color, 1);

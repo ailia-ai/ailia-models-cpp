@@ -282,10 +282,6 @@ int main(int argc, char **argv){
 	const char *input_path="./demo.wav";
 	const char *model_type="small";
 	const char *language="auto";
-	const char *task="transcribe";
-
-	// Get environment
-	int env_id = args_env_id;
 	
 	// Load wave file
 	int sampleRate,nChannels,nSamples;

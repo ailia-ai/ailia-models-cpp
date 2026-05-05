@@ -252,8 +252,8 @@ std::vector<float> calc_vad(AILIANetwork* net, std::vector<float> wave, int samp
 	std::vector<float> conf;
 
 	for (int s = 0; s < nSamples; s+=sequence){
-		for (int i = 0; i < input.size(); i++){
-			if (s + i < nSamples){
+		for (size_t i = 0; i < input.size(); i++){
+			if (s + (int)i < nSamples){
 				input[i] = wave[s + i];
 			}else{
 				input[i] = 0;
@@ -287,7 +287,7 @@ std::vector<float> calc_vad(AILIANetwork* net, std::vector<float> wave, int samp
 
 static int recognize_from_audio(AILIANetwork* net)
 {
-	int status = AILIA_STATUS_SUCCESS;
+	// unused: int status = AILIA_STATUS_SUCCESS;
 
 	int sampleRate, nChannels, nSamples;
 	std::vector<float> wave = read_wave_file(input_text.c_str(), &sampleRate, &nChannels, &nSamples);
@@ -309,7 +309,7 @@ static int recognize_from_audio(AILIANetwork* net)
 	std::vector<float> conf = calc_vad(net, wave, sampleRate, nChannels, nSamples);
 
 	PRINT_OUT("Confidence :\n");
-	for (int i = 0; i < conf.size(); i++){
+	for (size_t i = 0; i < conf.size(); i++){
 		if (i < 10){
 			PRINT_OUT("%f sec %f\n", i * sampleRate / 1536.0f, conf[i]);
 		}

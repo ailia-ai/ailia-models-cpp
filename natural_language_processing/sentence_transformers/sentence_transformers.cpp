@@ -375,7 +375,7 @@ std::vector<float> calc_embedding(AILIANetwork* net, struct AILIATokenizer *toke
 	if (prompt && debug){
 		PRINT_OUT("Input Tokens :\n");
 	}
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		input_ids[i] = (float)tokens[i];
 		attention_mask[i] = 1;
 		if (prompt && debug){
@@ -409,7 +409,7 @@ std::vector<float> calc_embedding(AILIANetwork* net, struct AILIATokenizer *toke
 
 float norm(std::vector<float> & vec1){
 	float norm1 = 0;
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		norm1 += vec1[i] * vec1[i];
 	}
 	norm1 = sqrt(norm1);
@@ -420,7 +420,7 @@ float cos_similarity(std::vector<float> & vec1, std::vector<float> & vec2){
 	float sum = 0;
 	float norm1 = norm(vec1);
 	float norm2 = norm(vec2);
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		sum += (vec1[i] / norm1) * (vec2[i] / norm2);
 	}
 	return sum;
@@ -428,7 +428,7 @@ float cos_similarity(std::vector<float> & vec1, std::vector<float> & vec2){
 
 static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokenizer)
 {
-	int status = AILIA_STATUS_SUCCESS;
+	// unused: int status = AILIA_STATUS_SUCCESS;
 
 	// Open database
 	std::vector<std::string> texts = open_texts(std::string("sample.txt"));
@@ -436,8 +436,8 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	// Embedding
 	std::vector< std::vector<float> > embeddings;
 	PRINT_OUT("Calculating embeddings\n");
-	for (int i = 0; i < texts.size(); i++){
-		PRINT_OUT("\r%d/%zu", i, texts.size());
+	for (size_t i = 0; i < texts.size(); i++){
+		PRINT_OUT("\r%zu/%zu", i, texts.size());
 		fflush(stdout);
 		std::vector<float> embedding = calc_embedding(net, tokenizer, texts[i], false);
 		embeddings.push_back(embedding);
@@ -453,7 +453,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	// Search
 	float max_score = 0.0f;
 	int max_i = 0;
-	for (int i = 0; i < texts.size(); i++){
+	for (size_t i = 0; i < texts.size(); i++){
 		float score = cos_similarity(query_embedding, embeddings[i]);
 		if (debug){
 			PRINT_OUT("%f ",score);

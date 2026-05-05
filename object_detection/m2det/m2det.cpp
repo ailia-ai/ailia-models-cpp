@@ -194,7 +194,7 @@ static void nms(std::vector<float>& c_scores, std::vector<box>& c_boxes,
 {
     // calculate area of the boxes
     std::vector<float> areas(c_scores.size());
-    for (int i = 0; i < c_scores.size(); i++) {
+    for (size_t i = 0; i < c_scores.size(); i++) {
         areas[i] = (c_boxes[i].x2-c_boxes[i].x1+1.0f)*(c_boxes[i].y2-c_boxes[i].y1+1.0f);
     }
 
@@ -210,7 +210,7 @@ static void nms(std::vector<float>& c_scores, std::vector<box>& c_boxes,
         std::vector<int> inds;
         int i = order[0];
         keep.push_back(i);
-        for (int j = 1; j < order.size(); j++) {
+        for (size_t j = 1; j < order.size(); j++) {
             int k = order[j];
             float xx1 = std::max(c_boxes[i].x1, c_boxes[k].x1);
             float yy1 = std::max(c_boxes[i].y1, c_boxes[k].y1);
@@ -270,7 +270,7 @@ static void gen_colors()
     int base = std::ceil(std::pow(COCO_CATEGORY.size(), 1.0f/3.0f));
     int base2 = base * base;
 
-    for (int indx = 0; indx < COCO_CATEGORY.size(); indx++) {
+    for (size_t indx = 0; indx < COCO_CATEGORY.size(); indx++) {
         float b = 2.0f - (float)indx / (float)base2;
         float g = 2.0f - (float)(indx % base2) / (float)base;
         float r = 2.0f - (indx % base2) % base;
@@ -290,14 +290,14 @@ static void draw_detection(const cv::Mat& img, cv::Mat& imgcv,
 
    int thick = (float)(imgw+imgh) / 300.0f;
 
-   for (int i = 0; i < boxes.size(); i++) {
+   for (size_t i = 0; i < boxes.size(); i++) {
        int cls_indx = cls_inds[i];
        cv::rectangle(imgcv,
                      cv::Point(boxes[i].x1, boxes[i].y1),
                      cv::Point(boxes[i].x2, boxes[i].y2),
                      COLORS[cls_indx], thick);
        char str[30];
-       sprintf(str, "%s: %.3f", COCO_CATEGORY[cls_indx], scores[i]);
+       snprintf(str, sizeof(str), "%s: %.3f", COCO_CATEGORY[cls_indx], scores[i]);
        std::string mess(str);
        cv::putText(imgcv, mess,
                    cv::Point(boxes[i].x1, boxes[i].y1-7),
@@ -377,10 +377,10 @@ static int detect_objects(const cv::Mat& img, AILIANetwork *detector, ioIndices 
     }
 
     // filter boxes for every class
-    for (int cls = 1; cls < out1_shape.x; cls++) {
+    for (size_t cls = 1; cls < out1_shape.x; cls++) {
         std::vector<float> c_scores;
         std::vector<box>   c_boxes;
-        for (int obj = 0; obj < out1_shape.y; obj++) {
+        for (size_t obj = 0; obj < out1_shape.y; obj++) {
             float score = dst1[obj*out1_shape.x+cls];
             if (score >= THRESHOLD) {
                 box c_box;
@@ -402,7 +402,7 @@ static int detect_objects(const cv::Mat& img, AILIANetwork *detector, ioIndices 
             keep.resize(KEEP_PER_CLASS);
         }
 
-        for (int i = 0; i < keep.size(); i++) {
+        for (size_t i = 0; i < keep.size(); i++) {
             int j = keep[i];
             box c_box;
             c_box.x1 = c_boxes[j].x1*imgw;
@@ -458,7 +458,7 @@ static int recognize_from_image(AILIANetwork *detector, ioIndices io_inds)
         }
     }
 
-    for (int i = 0; i < boxes.size(); i++) {
+    for (size_t i = 0; i < boxes.size(); i++) {
         PRINT_OUT("pos:(%.1f,%.1f,%.1f,%.1f), ids:%s, score:%.3f\n",
                   boxes[i].x1, boxes[i].y1, boxes[i].x2, boxes[i].y2,
                   COCO_CATEGORY[cls_inds[i]], scores[i]);

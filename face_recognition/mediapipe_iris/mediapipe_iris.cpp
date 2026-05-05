@@ -604,12 +604,12 @@ static int detect_face(AILIANetwork* ailia, const cv::Mat& mat_input, std::vecto
 
     int input_size = input_shape.x * input_shape.y * input_shape.z * input_shape.w * sizeof(float);
 
-    assert(input_shape.dim == mat_input.dims);
-    assert(input_shape.w == mat_input.size[0]);
-    assert(input_shape.z == mat_input.size[1]);
-    assert(input_shape.y == mat_input.size[2]);
-    assert(input_shape.x == mat_input.size[3]);
-    assert(mat_input.total() * mat_input.elemSize() == input_size);
+    assert(input_shape.dim == (unsigned int)mat_input.dims);
+    assert(input_shape.w == (unsigned int)mat_input.size[0]);
+    assert(input_shape.z == (unsigned int)mat_input.size[1]);
+    assert(input_shape.y == (unsigned int)mat_input.size[2]);
+    assert(input_shape.x == (unsigned int)mat_input.size[3]);
+    assert((int)(mat_input.total() * mat_input.elemSize()) == input_size);
 
     status = ailiaSetInputBlobData(ailia, mat_input.data, input_size, input_index);
     if (status != AILIA_STATUS_SUCCESS) {
@@ -659,7 +659,7 @@ static int detect_face(AILIANetwork* ailia, const cv::Mat& mat_input, std::vecto
 
         mat_output = cv::Mat((int)output_shape.y, (int)output_shape.x, CV_32FC1);
 
-        assert(mat_output.total() * mat_output.elemSize() == output_size);
+        assert((int)(mat_output.total() * mat_output.elemSize()) == output_size);
 
         status = ailiaGetBlobData(ailia, mat_output.data, output_size, output_index);
         if (status != AILIA_STATUS_SUCCESS) {
@@ -704,12 +704,12 @@ static int estimate_landmarks(AILIANetwork* ailia, const cv::Mat& mat_input, std
 
     int input_size = input_shape.x * input_shape.y * input_shape.z * input_shape.w * sizeof(float);
 
-    assert(input_shape.dim == mat_input.dims);
-    assert(input_shape.w == mat_input.size[0]);
-    assert(input_shape.z == mat_input.size[1]);
-    assert(input_shape.y == mat_input.size[2]);
-    assert(input_shape.x == mat_input.size[3]);
-    assert(mat_input.total() * mat_input.elemSize() == input_size);
+    assert(input_shape.dim == (unsigned int)mat_input.dims);
+    assert(input_shape.w == (unsigned int)mat_input.size[0]);
+    assert(input_shape.z == (unsigned int)mat_input.size[1]);
+    assert(input_shape.y == (unsigned int)mat_input.size[2]);
+    assert(input_shape.x == (unsigned int)mat_input.size[3]);
+    assert((int)(mat_input.total() * mat_input.elemSize()) == input_size);
 
     status = ailiaSetInputBlobData(ailia, mat_input.data, input_size, input_index);
     if (status != AILIA_STATUS_SUCCESS) {
@@ -760,7 +760,7 @@ static int estimate_landmarks(AILIANetwork* ailia, const cv::Mat& mat_input, std
 
         mat_output = cv::Mat((int)output_shape.y, (int)output_shape.x, CV_32FC1);
 
-        assert(mat_output.total() * mat_output.elemSize() == output_size);
+        assert((int)(mat_output.total() * mat_output.elemSize()) == output_size);
 
         status = ailiaGetBlobData(ailia, mat_output.data, output_size, output_index);
         if (status != AILIA_STATUS_SUCCESS) {
@@ -818,7 +818,7 @@ static int estimate_iris(AILIANetwork* ailia, const cv::Mat& mat_input, std::vec
 
     int input_size = input_shape.x * input_shape.y * input_shape.z * input_shape.w * sizeof(float);
 
-    assert(mat_input.total() * mat_input.elemSize() == input_size);
+    assert((int)(mat_input.total() * mat_input.elemSize()) == input_size);
 
     status = ailiaSetInputBlobData(ailia, mat_input.data, input_size, input_index);
     if (status != AILIA_STATUS_SUCCESS) {
@@ -869,7 +869,7 @@ static int estimate_iris(AILIANetwork* ailia, const cv::Mat& mat_input, std::vec
 
         mat_output = cv::Mat((int)output_shape.y, (int)output_shape.x, CV_32FC1);
 
-        assert(mat_output.total() * mat_output.elemSize() == output_size);
+        assert((int)(mat_output.total() * mat_output.elemSize()) == output_size);
 
         status = ailiaGetBlobData(ailia, mat_output.data, output_size, output_index);
         if (status != AILIA_STATUS_SUCCESS) {
@@ -892,7 +892,7 @@ static int recognize(AILIANetwork* ailia_blazeface, AILIANetwork* ailia_facemesh
 
     // prepare image
     cv::Mat mat_rgb;
-    cv:cvtColor(mat_img, mat_rgb, cv::COLOR_BGRA2RGB);
+    cv::cvtColor(mat_img, mat_rgb, cv::COLOR_BGRA2RGB);
 
     cv::Mat mat_data;
     float scale;
@@ -934,7 +934,7 @@ static int recognize(AILIANetwork* ailia_blazeface, AILIANetwork* ailia_facemesh
         }
 
         cv::Mat& mat_landmarks = vec_estimates1[0];
-        cv::Mat& mat_confidence = vec_estimates1[1];
+        // unused: cv::Mat& mat_confidence = vec_estimates1[1];
 
         // iris landmark estimation
         cv::Mat mat_images;

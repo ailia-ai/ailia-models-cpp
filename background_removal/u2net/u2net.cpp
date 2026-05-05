@@ -105,7 +105,7 @@ static void print_error(std::string arg)
 static void print_arch_error(std::string arg)
 {
     PRINT_ERR("u2net: error: argument -a/--arch: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < MODEL_LISTS.size(); i++) {
+    for (size_t i = 0; i < MODEL_LISTS.size(); i++) {
         PRINT_ERR(" \'%s\'", MODEL_LISTS[i]);
         if (i < MODEL_LISTS.size() - 1) {
             PRINT_ERR(",");
@@ -119,7 +119,7 @@ static void print_arch_error(std::string arg)
 static void print_opset_error(std::string arg)
 {
     PRINT_ERR("u2net: error: argument -o/--opset: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < OPSET_LISTS.size(); i++) {
+    for (size_t i = 0; i < OPSET_LISTS.size(); i++) {
         PRINT_ERR(" \'%s\'", OPSET_LISTS[i]);
         if (i < OPSET_LISTS.size() - 1) {
             PRINT_ERR(",");
@@ -170,7 +170,7 @@ static int argument_parser(int argc, char **argv)
             }
         }
         else if (arg[0] != '-') {
-            int j;
+            size_t j;
             switch (status) {
             case 1:
                 image_path = arg;
