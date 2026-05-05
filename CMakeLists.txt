@@ -25,7 +25,7 @@ set(AILIA_VOICE_PATH ${CMAKE_SOURCE_DIR}/ailia_voice/library)
 set(AILIA_TRACKER_PATH ${CMAKE_SOURCE_DIR}/ailia_tracker/library)
 set(AILIA_TFLITE_PATH ${CMAKE_SOURCE_DIR}/ailia_tflite/library)
 
-set (INCLUDE_PATH ${AILIA_LIBRARY_PATH}/include ${AILIA_AUDIO_PATH}/include ${AILIA_TOKENIZER_PATH}/include ${AILIA_SPEECH_PATH}/include ${AILIA_VOICE_PATH}/include ${AILIA_TRACKER_PATH}/include ${CMAKE_SOURCE_DIR}/ailia_tflite/include ../../util)
+set (INCLUDE_PATH ${AILIA_LIBRARY_PATH}/include ${AILIA_AUDIO_PATH}/include ${AILIA_TOKENIZER_PATH}/include ${AILIA_SPEECH_PATH}/include ${AILIA_VOICE_PATH}/include ${AILIA_TRACKER_PATH}/include ${AILIA_TFLITE_PATH}/include ../../util)
 if(WIN32)
     set (LIBRARY_PATH ${AILIA_LIBRARY_PATH}/windows/x64 ${AILIA_AUDIO_PATH}/windows/x64 ${AILIA_TOKENIZER_PATH}/windows/x64 ${AILIA_SPEECH_PATH}/windows/x64 ${AILIA_VOICE_PATH}/windows/x64 ${AILIA_TRACKER_PATH}/windows/x64 ${AILIA_TFLITE_PATH}/windows/x64)
 elseif(APPLE)
