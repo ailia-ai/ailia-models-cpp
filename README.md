@@ -13,8 +13,16 @@ ailia SDK is a cross-platform high speed inference SDK. The ailia SDK provides a
 The ailia SDK can be installed from a git submodule.
 
 ```
-git subomdule init
+git submodule init
 git submodule update
+```
+
+#### Mac
+
+On macOS, the bundled `.dylib` files come with the `com.apple.quarantine` attribute, which causes Gatekeeper to reject them with errors such as `libailia_voice.dylib is damaged`. Strip the attribute by running the helper script after `git submodule update`:
+
+```
+./util/remove_quarantine.sh
 ```
 
 ### Download license file
