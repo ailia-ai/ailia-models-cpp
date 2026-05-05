@@ -83,10 +83,10 @@ cmake .
 cmake --build .
 ```
 
-To build only the audio/NLP samples (e.g. whisper and gpt-sovits-v2-pro) without OpenCV, pass `-DOPENCV=OFF`.
+To build only the audio/NLP samples (e.g. whisper and gpt-sovits-v2-pro) without OpenCV, pass `-DWITH_OPENCV=OFF`.
 
 ```
-cmake -DOPENCV=OFF .
+cmake -DWITH_OPENCV=OFF .
 cmake --build .
 ```
 
