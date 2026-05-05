@@ -8,7 +8,7 @@ set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 project(${PROJECT_NAME} CXX)
 
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS} ${INCLUDE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${OpenCV_INCLUDE_DIRS} ${INCLUDE_PATH})
 link_directories(${OpenCV_LIBRARY_DIRS} ${LIBRARY_PATH})
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
