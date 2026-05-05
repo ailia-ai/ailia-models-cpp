@@ -195,11 +195,11 @@ struct FaceInfo {
 };
 
 vector<vector<float>> reshape(const vector<float>& array, int columns) {
-    int rows = array.size() / columns;
+    int rows = (int)array.size() / columns;
     vector<vector<float>> reshaped(rows, vector<float>(columns));
     for (size_t i = 0; i < array.size(); ++i) {
-        int row = i / columns;
-        int column = i % columns;
+        int row = (int)i / columns;
+        int column = (int)i % columns;
         reshaped[row][column] = array[i];
     }
     return reshaped;
@@ -238,7 +238,7 @@ vector<vector<float>> prior_box_forward(int image_width, int image_height) {
 }
 
 vector<vector<float>> decode_box(const vector<vector<float>>& src_box, const vector<vector<float>>& priors) {
-    int numBoxes = priors.size();
+    int numBoxes = (int)priors.size();
     vector<vector<float>> dst_box(numBoxes, vector<float>(4));
 
     for (int i = 0; i < numBoxes; ++i) {
@@ -256,7 +256,7 @@ vector<vector<float>> decode_box(const vector<vector<float>>& src_box, const vec
 }
 
 vector<float> decode_score(const vector<vector<float>>& src_score) {
-    int numElements = src_score.size();
+    int numElements = (int)src_score.size();
     vector<float> dst_score(numElements);
     for (int i = 0; i < numElements; ++i) {
         dst_score[i] = src_score[i][1];
@@ -265,7 +265,7 @@ vector<float> decode_score(const vector<vector<float>>& src_score) {
 }
 
 vector<vector<float>> decode_landmark(const vector<vector<float>>& src_landmark, const vector<vector<float>>& priors) {
-    int numBoxes = priors.size();
+    int numBoxes = (int)priors.size();
     vector<vector<float>> dst_landmark(numBoxes, vector<float>(10));
     for (int i = 0; i < numBoxes; ++i) {
         for (int j = 0; j < NUM_KEYPOINTS; ++j) {
@@ -277,8 +277,8 @@ vector<vector<float>> decode_landmark(const vector<vector<float>>& src_landmark,
 }
 
 vector<vector<float>> scale(const vector<vector<float>>& src, const vector<int>& scale) {
-    int src_width = src.size();
-    int src_height = src[0].size();
+    int src_width = (int)src.size();
+    int src_height = (int)src[0].size();
     vector<vector<float>> dst(src_width, vector<float>(src_height));
 
     for (int i = 0; i < src_width; ++i) {
@@ -298,7 +298,7 @@ vector<float> filter(const vector<float>& src, const vector<int>& inds) {
 }
 
 vector<vector<float>> filter(const vector<vector<float>>& src, const vector<int>& inds) {
-    int src_element_num = src[0].size();
+    int src_element_num = (int)src[0].size();
     vector<vector<float>> dst(inds.size(), vector<float>(src_element_num));
 
     for (size_t i = 0; i < inds.size(); ++i) {
@@ -319,7 +319,7 @@ vector<float> keep_top_k_before_nms(const vector<float>& src, const vector<int>&
 }
 
 vector<vector<float>> keep_top_k_before_nms(const vector<vector<float>>& src, const vector<int>& order, int top_k) {
-    int src_element_num = src[0].size();
+    int src_element_num = (int)src[0].size();
     vector<vector<float>> dst(top_k, vector<float>(src_element_num));
 
     for (int i = 0; i < top_k; ++i) {
@@ -331,7 +331,7 @@ vector<vector<float>> keep_top_k_before_nms(const vector<vector<float>>& src, co
 }
 
 vector<int> nms(const vector<vector<float>>& boxes, const vector<float>& scores, float thresh) {
-    int numBoxes = boxes.size();
+    int numBoxes = (int)boxes.size();
     vector<float> x1(numBoxes), y1(numBoxes), x2(numBoxes), y2(numBoxes);
     
     for (int i = 0; i < numBoxes; ++i) {
@@ -383,7 +383,7 @@ bool compare_indices(const std::pair<int, float>& a, const std::pair<int, float>
 std::vector<int> sort_indices_by_score(const std::vector<float>& filtered_score) {
     std::vector<std::pair<int, float>> indexed_scores;
     for (size_t i = 0; i < filtered_score.size(); ++i) {
-        indexed_scores.emplace_back(i, filtered_score[i]);
+        indexed_scores.emplace_back((int)i, filtered_score[i]);
     }
 
     std::sort(indexed_scores.begin(), indexed_scores.end(), compare_indices);
@@ -419,7 +419,7 @@ vector<FaceInfo> post_process(const vector<float>& box_data, const vector<float>
     vector<int> inds;
     for (size_t i = 0; i < scores.size(); i++) {
         if (scores[i] > CONFIDENCE_THRES) {
-            inds.push_back(i);
+            inds.push_back((int)i);
         }
     }
 
@@ -439,7 +439,7 @@ vector<FaceInfo> post_process(const vector<float>& box_data, const vector<float>
 
     vector<int> keep = nms(top_k_boxes, top_k_scores, NMS_THRES);
 
-    int row = keep.size();
+    int row = (int)keep.size();
     vector<vector<float>> nms_boxes(row, vector<float>(BOX_DIM));
     vector<float> nms_scores(row);
     vector<vector<float>> nms_landmarks(row, vector<float>(LANDMARK_DIM));
@@ -617,7 +617,7 @@ int plot_result_retinaface(std::vector<FaceInfo> info, cv::Mat& img, bool loggin
         cv::Point text_position((int)((obj.center.first - obj.width / 2))+4, (int)((obj.center.second - obj.height / 2)+4));
 
         // update image
-        cv::Scalar color = hsv_to_rgb(256*((float)i/(float)info.size()), 255, 255);
+        cv::Scalar color = hsv_to_rgb((int)(256*((float)i/(float)info.size())), 255, 255);
         // unused: float fontScale = (float)img.cols / 512.0f;
         cv::rectangle(img, top_left, bottom_right, color, 4);
     }

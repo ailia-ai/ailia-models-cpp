@@ -189,12 +189,12 @@ static void line(cv::Mat& img, AILIAPoseEstimatorObjectPose person, int point1, 
 
     if (person.points[point1].score > threshold &&
         person.points[point2].score > threshold) {
-        cv::Scalar color = hsv_to_rgb((float)(255*point1)/(float)AILIA_POSE_ESTIMATOR_POSE_KEYPOINT_CNT, 255, 255);
+        cv::Scalar color = hsv_to_rgb((int)((float)(255*point1)/(float)AILIA_POSE_ESTIMATOR_POSE_KEYPOINT_CNT), 255, 255);
 
-        int x1 = img.cols * person.points[point1].x;
-        int y1 = img.rows * person.points[point1].y;
-        int x2 = img.cols * person.points[point2].x;
-        int y2 = img.rows * person.points[point2].y;
+        int x1 = (int)(img.cols * person.points[point1].x);
+        int y1 = (int)(img.rows * person.points[point1].y);
+        int x2 = (int)(img.cols * person.points[point2].x);
+        int y2 = (int)(img.rows * person.points[point2].y);
         cv::line(img, cv::Point(x1, y1), cv::Point(x2, y2), color, 5);
     }
 }
@@ -215,7 +215,7 @@ static int display_result(cv::Mat& img, AILIAPoseEstimator* pose, bool logging =
 
     for (size_t i = 0; i < obj_count ;i++) {
         AILIAPoseEstimatorObjectPose person;
-        status = ailiaPoseEstimatorGetObjectPose(pose, &person, i, AILIA_POSE_ESTIMATOR_OBJECT_POSE_VERSION);
+        status = ailiaPoseEstimatorGetObjectPose(pose, &person, (unsigned int)i, AILIA_POSE_ESTIMATOR_OBJECT_POSE_VERSION);
         if (status != AILIA_STATUS_SUCCESS) {
             PRINT_ERR("ailiaPoseEstimatorGetObjectPose failed %d\n", status);
             return -1;
@@ -405,7 +405,7 @@ int main(int argc, char **argv)
     int env_id = AILIA_ENVIRONMENT_ID_AUTO;
     for (size_t i = 0; i < env_count; i++) {
         AILIAEnvironment* env_ptr = nullptr;
-        status = ailiaGetEnvironment(&env_ptr, i, AILIA_ENVIRONMENT_VERSION);
+        status = ailiaGetEnvironment(&env_ptr, (unsigned int)i, AILIA_ENVIRONMENT_VERSION);
         if(status != AILIA_STATUS_SUCCESS) {
             PRINT_ERR("ailiaGetEnvironment failed %d\n", status);
             return -1;

@@ -169,9 +169,9 @@ void log_softmax(float *data, int n){
 
 	float sum = 0;
 	for (int i = 0; i < n; i++){
-		sum += exp(data[i] - max_value);
+		sum += expf(data[i] - max_value);
 	}
-	sum = log(sum);
+	sum = logf(sum);
 
 	for (int i = 0; i < n; i++){
 		data[i] = (data[i] - max_value) - sum;
@@ -242,7 +242,7 @@ int forward_encoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_E
 
 		AILIAShape sequence_shape;
 		int batch_size = 1;
-		sequence_shape.x=inputs[i]->size();
+		sequence_shape.x=(unsigned int)inputs[i]->size();
 		sequence_shape.y=batch_size;
 		sequence_shape.z=1;
 		sequence_shape.w=1;
@@ -259,7 +259,7 @@ int forward_encoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_E
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -294,7 +294,7 @@ int forward_encoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_E
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -319,7 +319,7 @@ int forward_decoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_D
 		int batch_size = 1;
 		if (i == 0){
 			// tokens
-			sequence_shape.x=inputs[i]->size();
+			sequence_shape.x=(unsigned int)inputs[i]->size();
 			sequence_shape.y=batch_size;
 			sequence_shape.z=1;
 			sequence_shape.w=1;
@@ -345,7 +345,7 @@ int forward_decoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_D
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -380,7 +380,7 @@ int forward_decoder(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS_D
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -466,7 +466,7 @@ static int recognize_from_text(AILIANetwork* encoder, AILIANetwork* decoder, str
 			return status;
 		}
 
-		int offset = logits.size() - LOGITS_LENGTH;
+		int offset = (int)logits.size() - LOGITS_LENGTH;
 
 		float logits_current[LOGITS_LENGTH];
 		memcpy(logits_current, &logits[offset], sizeof(float) * LOGITS_LENGTH);
@@ -490,7 +490,7 @@ static int recognize_from_text(AILIANetwork* encoder, AILIANetwork* decoder, str
 			break;
 		}
 
-		tokens.push_back(arg_max);
+		tokens.push_back((float)arg_max);
 		tokens_int.push_back(arg_max);
 	}
 	

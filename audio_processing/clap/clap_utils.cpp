@@ -38,7 +38,7 @@ static std::vector<float> get_mel_ailia(std::vector<float>& audio_data, const AU
     status = ailiaAudioGetMelSpectrogram(
         &mel[0],
         &audio_data[0],
-        audio_data.size(),
+        (int)audio_data.size(),
         audio_cfg.sample_rate,
         audio_cfg.window_size,
         audio_cfg.hop_size,
@@ -46,10 +46,10 @@ static std::vector<float> get_mel_ailia(std::vector<float>& audio_data, const AU
         AILIA_AUDIO_WIN_TYPE_HANN,
         frame_n,
         center,
-        2.0,    // power
+        2.0f,    // power
         AILIA_AUDIO_FFT_NORMALIZE_NONE,
-        audio_cfg.fmin,
-        audio_cfg.fmax,
+        (float)audio_cfg.fmin,
+        (float)audio_cfg.fmax,
         mel_n,
         AILIA_AUDIO_MEL_NORMALIZE_NONE,
         AILIA_AUDIO_MEL_SCALE_FORMULA_HTK
@@ -60,8 +60,8 @@ static std::vector<float> get_mel_ailia(std::vector<float>& audio_data, const AU
     }
 
     // amplitude_to_db
-    const float ref = 1.0;
-    const float amin = 1e-10;
+    const float ref = 1.0f;
+    const float amin = 1e-10f;
     for(auto v=mel.begin(); v!=mel.end(); ++v){
         float s = (*v) * (*v);
         if(s >= 0 && s < amin) s = amin;
@@ -135,7 +135,7 @@ std::vector<float> get_audio_features(std::vector<float>& audio_data, unsigned i
             int chunk_frames = max_len / audio_cfg.hop_size + 1;  // the +1 related to how the spectrogram is computed
             int total_frames = frame_n;
             if(debug){
-                PRINT_OUT("shrink audio %ld to be %d, frame_n=%d\n", audio_data.size(), max_len, frame_n);
+                PRINT_OUT("shrink audio %zu to be %d, frame_n=%d\n", audio_data.size(), max_len, frame_n);
             }
             if(chunk_frames == total_frames){
                 // there is a corner case where the audio length is
@@ -179,16 +179,16 @@ std::vector<float> get_audio_features(std::vector<float>& audio_data, unsigned i
     else{   // padding
         if(audio_data.size() < max_len){
             if(debug){
-                PRINT_OUT("padding for audio %ld to be %d\n", audio_data.size(), max_len);
+                PRINT_OUT("padding for audio %zu to be %d\n", audio_data.size(), max_len);
             }
             std::vector<float> new_audio_data(max_len, 0);
             if(data_filling == "repeatpad"  || data_filling == "repeat"){
-                int n_repeat = max_len / audio_data.size();
+                int n_repeat = (int)(max_len / audio_data.size());
                 for(int i=0; i<n_repeat; i++){
                     memcpy(&new_audio_data[i * audio_data.size()], &audio_data[0], audio_data.size() * sizeof(float));
                 }
                 if(data_filling == "repeat"){
-                    int rem = max_len - audio_data.size() * n_repeat;
+                    int rem = (int)(max_len - audio_data.size() * n_repeat);
                     memcpy(&new_audio_data[n_repeat * audio_data.size()], &audio_data[0], rem * sizeof(float));
                 }
             }

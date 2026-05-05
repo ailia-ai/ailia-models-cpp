@@ -251,8 +251,8 @@ static void resize_pad(cv::Mat& mat_src, cv::Mat& mat_dst, float& scale, int pad
 
     cv::resize(mat_pad, mat_dst, cv::Size(128, 128));
 
-    pad[0] = (float)padh1 * scale;
-    pad[1] = (float)padw1 * scale;
+    pad[0] = (int)((float)padh1 * scale);
+    pad[1] = (int)((float)padw1 * scale);
 }
 
 
@@ -346,7 +346,7 @@ static void extract_roi(const cv::Mat& mat_input, float& xc, float& yc, float& s
     mat_m = cv::getAffineTransform(mat_pts, mat_points1);
 
     cv::Mat mat_warp1;
-    cv::warpAffine(mat_input, mat_warp1, mat_m, cv::Size(res, res), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(127.5f));
+    cv::warpAffine(mat_input, mat_warp1, mat_m, cv::Size((int)res, (int)res), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(127.5f));
 
     cv::Mat mat_warp2;
     normalize_image(mat_warp1, mat_warp2, "127.5");
@@ -452,7 +452,7 @@ static void iris_preprocess(const cv::Mat& mat_input, const cv::Mat& mat_landmar
         cv::Scalar eye_center = cv::mean(mat_filter);
         int x = (int)round(eye_center[0] - 32.0);
         int y = (int)round(eye_center[1] - 32.0);
-        vec_origins.push_back(cv::Point2f(x + 63, y));
+        vec_origins.push_back(cv::Point2f((float)(x + 63), (float)y));
 
         cv::Mat mat_image1;
         cv::flip(mat_input2(cv::Rect(x, y, 64, 64)), mat_image1, 1);
@@ -470,7 +470,7 @@ static void iris_preprocess(const cv::Mat& mat_input, const cv::Mat& mat_landmar
         cv::Scalar eye_center = cv::mean(mat_filter);
         int x = (int)round(eye_center[0] - 32.0);
         int y = (int)round(eye_center[1] - 32.0);
-        vec_origins.push_back(cv::Point2f(x, y));
+        vec_origins.push_back(cv::Point2f((float)x, (float)y));
 
         cv::Mat mat_image1;
         mat_image1 = mat_input2(cv::Rect(x, y, 64, 64)).clone();

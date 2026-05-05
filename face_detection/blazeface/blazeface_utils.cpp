@@ -598,7 +598,7 @@ static void weighted_non_max_suppression(const std::vector<cv::Mat> &detections,
         cv::Mat first_box = detection.colRange(cv::Range(0, 4));
         cv::Mat other_boxes = cv::Mat((int)remaining.size(), 4, CV_32FC1);
         for (size_t i = 0; i < remaining.size(); i++) {
-            cv::Rect roi(0, i, 4, 1);
+            cv::Rect roi(0, (int)i, 4, 1);
             detections[remaining[i]].colRange(cv::Range(0, 4)).copyTo(other_boxes(roi));
         }
         cv::Mat ious;

@@ -183,7 +183,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 
 	for (size_t i = 0; i < inputs.size(); i++){
 		unsigned int input_blob_idx = 0;
-		status = ailiaGetBlobIndexByInputIndex(ailia, &input_blob_idx, i);
+		status = ailiaGetBlobIndexByInputIndex(ailia, &input_blob_idx, (unsigned int)i);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobIndexByInputIndex", ailiaGetErrorDetail(ailia));
 		}
@@ -216,7 +216,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 
 	for (size_t i = 0; i < output_blob_cnt; i++){
 		unsigned int output_blob_idx = 0;
-		status = ailiaGetBlobIndexByOutputIndex(ailia, &output_blob_idx, i);
+		status = ailiaGetBlobIndexByOutputIndex(ailia, &output_blob_idx, (unsigned int)i);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobIndexByInputIndex",ailiaGetErrorDetail(ailia));
 		}
@@ -286,7 +286,7 @@ static std::vector<float> cleaned_text_to_sequence(const char ** data, int size)
 				if (debug_token){
 					PRINT_OUT("%d ", s);
 				}
-				sequence.push_back(s);
+				sequence.push_back((float)s);
 				break;
 			}
 		}
@@ -302,7 +302,7 @@ static AILIATensor ssl_forward(std::vector<float> ref_audio_16k, AILIANetwork* n
 	std::vector<AILIATensor*> inputs;
 	AILIATensor tensor;
 	tensor.data = ref_audio_16k;
-	tensor.shape.x = ref_audio_16k.size();
+	tensor.shape.x = (unsigned int)ref_audio_16k.size();
 	tensor.shape.y = 1;
 	tensor.shape.z = 1;
 	tensor.shape.w = 1;
@@ -319,7 +319,7 @@ int argmax(AILIATensor logits){
 	for (size_t i = 0; i < logits.data.size(); i++){
 		if (logits.data[i] > max_p){
 			max_p = logits.data[i];
-			max_i = i;
+			max_i = (int)i;
 		}
 	}
 	return max_i;
@@ -374,7 +374,7 @@ static AILIATensor t2s_forward(AILIATensor ref_seq, AILIATensor text_seq, AILIAT
 
 	AILIATensor repetition_penalty;
 	repetition_penalty.data = std::vector<float>(1);
-	repetition_penalty.data[0] = 1.35;
+	repetition_penalty.data[0] = 1.35f;
 	repetition_penalty.shape.x = 1;
 	repetition_penalty.shape.y = 1;
 	repetition_penalty.shape.z = 1;
@@ -454,7 +454,7 @@ static AILIATensor t2s_forward(AILIATensor ref_seq, AILIATensor text_seq, AILIAT
 	}
 
 	y.data = std::vector<float>(y.data.begin() + y.data.size() - idx, y.data.begin() + y.data.size() - 1); // dont store prefix and last eos element
-	y.shape.x = y.data.size();
+	y.shape.x = (unsigned int)y.data.size();
 	y.shape.y = 1;
 	y.shape.z = 1;
 	y.shape.w = 1;
@@ -490,7 +490,7 @@ static int recognize_from_audio(AILIANetwork* net[MODEL_N])
 	}
 	AILIATensor ref_seq;
 	ref_seq.data = cleaned_text_to_sequence(REF_PHONES, REF_PHONES_SIZE);
-	ref_seq.shape.x = ref_seq.data.size();
+	ref_seq.shape.x = (unsigned int)ref_seq.data.size();
 	ref_seq.shape.y = 1;
 	ref_seq.shape.z = 1;
 	ref_seq.shape.w = 1;
@@ -501,7 +501,7 @@ static int recognize_from_audio(AILIANetwork* net[MODEL_N])
 	}
 	AILIATensor text_seq;
 	text_seq.data = cleaned_text_to_sequence(TEXT_PHONES, TEXT_PHONES_SIZE);
-	text_seq.shape.x = text_seq.data.size();
+	text_seq.shape.x = (unsigned int)text_seq.data.size();
 	text_seq.shape.y = 1;
 	text_seq.shape.z = 1;
 	text_seq.shape.w = 1;
@@ -513,28 +513,28 @@ static int recognize_from_audio(AILIANetwork* net[MODEL_N])
 
 	ref_bert.data = std::vector<float>(ref_seq.data.size() * BERT_DIM);
 	ref_bert.shape.x = BERT_DIM;
-	ref_bert.shape.y = ref_seq.data.size();
+	ref_bert.shape.y = (unsigned int)ref_seq.data.size();
 	ref_bert.shape.z = 1;
 	ref_bert.shape.w = 1;
 	ref_bert.shape.dim = 2;
 
 	text_bert.data = std::vector<float>(text_seq.data.size() * BERT_DIM);
 	text_bert.shape.x = BERT_DIM;
-	text_bert.shape.y = text_seq.data.size();
+	text_bert.shape.y = (unsigned int)text_seq.data.size();
 	text_bert.shape.z = 1;
 	text_bert.shape.w = 1;
 	text_bert.shape.dim = 2;
 
 	// resmaple to 16k and 32k
 	const int vits_hps_data_sampling_rate = 32000;
-	std::vector<float> zero_wav(vits_hps_data_sampling_rate * 0.3);
+	std::vector<float> zero_wav((size_t)(vits_hps_data_sampling_rate * 0.3));
 	std::vector<float> wav16k = resample(wave, 16000, sampleRate, nChannels);
 	std::vector<float> ref_audio_16k = wav16k;
 	ref_audio_16k.insert(ref_audio_16k.end(), zero_wav.begin(), zero_wav.end());
 
 	AILIATensor ref_audio;	
 	ref_audio.data = resample(wave, vits_hps_data_sampling_rate, sampleRate, nChannels);
-	ref_audio.shape.x = ref_audio.data.size();
+	ref_audio.shape.x = (unsigned int)ref_audio.data.size();
 	ref_audio.shape.y = 1;
 	ref_audio.shape.z = 1;
 	ref_audio.shape.w = 1;

@@ -94,7 +94,7 @@ unordered_map<string, int> AveragedPerceptron::_get_features(int i, const string
 		features[key]++;
 	};
 
-	i += START.size();
+	i += (int)START.size();
 	add("bias");
 	if (word.size() >= 3)
 		add("i suffix", { word.substr(word.size() - 3) });
@@ -155,7 +155,7 @@ vector<pair<string, string>> AveragedPerceptron::tag(const vector<string>& token
 		if (tagdict.find(word) != tagdict.end()) {
 			tag = tagdict.at(word);
 		} else {
-			auto features = _get_features(i, word, context, prev, prev2);
+			auto features = _get_features((int)i, word, context, prev, prev2);
 			tag = predict(features);
 		}
 		output.push_back({ word, tag });

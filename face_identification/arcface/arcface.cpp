@@ -396,7 +396,7 @@ static int face_identification(std::vector<cv::Mat>& fe_list, AILIANetwork *net,
         fe_list[i].copyTo(fe);;
         float sim = cosin_metric(fe, fe_2);
         if (sim > score_sim) {
-            id_sim = i;
+            id_sim = (int)i;
             score_sim = sim;
         }
     }

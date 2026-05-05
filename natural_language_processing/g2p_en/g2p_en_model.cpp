@@ -86,7 +86,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 
 	for (size_t i = 0; i < inputs.size(); i++){
 		unsigned int input_blob_idx = 0;
-		status = ailiaGetBlobIndexByInputIndex(ailia, &input_blob_idx, i);
+		status = ailiaGetBlobIndexByInputIndex(ailia, &input_blob_idx, (unsigned int)i);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobIndexByInputIndex", ailiaGetErrorDetail(ailia));
 		}
@@ -119,7 +119,7 @@ void forward(AILIANetwork *ailia, std::vector<AILIATensor*> &inputs, std::vector
 
 	for (size_t i = 0; i < output_blob_cnt; i++){
 		unsigned int output_blob_idx = 0;
-		status = ailiaGetBlobIndexByOutputIndex(ailia, &output_blob_idx, i);
+		status = ailiaGetBlobIndexByOutputIndex(ailia, &output_blob_idx, (unsigned int)i);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobIndexByInputIndex",ailiaGetErrorDetail(ailia));
 		}
@@ -277,7 +277,7 @@ std::vector<int> tokenize(const std::string& word) {
 	
 	std::map<std::string, int> g2idx;
 	for(size_t i = 0; i < graphemes.size(); ++i) {
-		g2idx[graphemes[i]] = i;
+		g2idx[graphemes[i]] = (int)i;
 	}
 
 	std::vector<int> x;
@@ -308,7 +308,7 @@ std::vector<std::string> get_phonemes() {
 std::unordered_map<int, std::string> get_idx2p(const std::vector<std::string>& phonemes) {
 	std::unordered_map<int, std::string> idx2p;
 	for (size_t i = 0; i < phonemes.size(); ++i) {
-		idx2p[i] = phonemes[i];
+		idx2p[(int)i] = phonemes[i];
 	}
 	return idx2p;
 }
@@ -347,7 +347,7 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 
 	for (size_t i = 0; i < x.size(); i++){
 		std::vector<float> x_data(1);
-		x_data[0] = x[i];
+		x_data[0] = (float)x[i];
 
 		AILIATensor x_tensor;
 		x_tensor.data = x_data;
@@ -372,11 +372,11 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 
 	for (int i = 0; i < 20; i++){
 		std::vector<float> pred_data(1);
-		pred_data[0] = pred;
+		pred_data[0] = (float)pred;
 
 		AILIATensor pred_tensor;
 		pred_tensor.data = pred_data;
-		pred_tensor.shape.x = pred_data.size();
+		pred_tensor.shape.x = (unsigned int)pred_data.size();
 		pred_tensor.shape.y = 1;
 		pred_tensor.shape.z = 1;
 		pred_tensor.shape.w = 1;
@@ -396,7 +396,7 @@ std::vector<std::string> G2PEnModel::predict(const std::string &word){
 		for (size_t i = 0; i < logits_tensor.shape.x; i++){
 			if (max_logits < logits_tensor.data[i]){
 				max_logits = logits_tensor.data[i];
-				pred = i;
+				pred = (int)i;
 			}
 		}
 

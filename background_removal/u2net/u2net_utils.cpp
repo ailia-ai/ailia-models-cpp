@@ -81,7 +81,7 @@ static void normalize(const cv::Mat& simg, cv::Mat& dimg)
     dimg = cv::Mat(simg.rows, simg.cols, CV_8UC1);
     unsigned char* ddata = (unsigned char*)dimg.data;
     for (int i = 0; i < size; i++) {
-        ddata[i] = ((sdata[i]-min) / (max-min))*255.0f;
+        ddata[i] = (unsigned char)(((sdata[i]-min) / (max-min))*255.0f);
     }
 
     return;

@@ -223,7 +223,7 @@ int ailia_encode(AILIANetwork *ailia_encoder,
 
         AILIAShape encoder_input_blob_shape;
 		int batch_size = 1;
-        encoder_input_blob_shape.x=encoder_inputs[i]->size();
+        encoder_input_blob_shape.x=(unsigned int)encoder_inputs[i]->size();
         encoder_input_blob_shape.y=batch_size;
         encoder_input_blob_shape.z=1;
         encoder_input_blob_shape.w=1;
@@ -240,7 +240,7 @@ int ailia_encode(AILIANetwork *ailia_encoder,
 		}
 
         if (encoder_inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia_encoder, &(*encoder_inputs[i])[0], encoder_inputs[i]->size() * sizeof(float), encoder_input_blob_idx);
+			status = ailiaSetInputBlobData(ailia_encoder, &(*encoder_inputs[i])[0], (unsigned int)(encoder_inputs[i]->size() * sizeof(float)), encoder_input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia_encoder));
 				return status;
@@ -275,7 +275,7 @@ int ailia_encode(AILIANetwork *ailia_encoder,
 
         (*encoder_outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-        status =ailiaGetBlobData(ailia_encoder, &(*encoder_outputs[i])[0], encoder_outputs[i]->size() * sizeof(float), output_blob_idx);
+        status =ailiaGetBlobData(ailia_encoder, &(*encoder_outputs[i])[0], (unsigned int)(encoder_outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia_encoder));
 			return status;
@@ -302,14 +302,14 @@ int ailia_decode(AILIANetwork *ailia_decoder,
         AILIAShape decoder_input_blob_shape;
         int batch_size = 1;
         if (i == 0){
-            decoder_input_blob_shape.x=encoder_inputs[1]->size(); //encoderのattention_maskのshape
+            decoder_input_blob_shape.x=(unsigned int)encoder_inputs[1]->size(); //encoderのattention_maskのshape
             decoder_input_blob_shape.y=batch_size;
             decoder_input_blob_shape.z=1;
             decoder_input_blob_shape.w=1;
             decoder_input_blob_shape.dim=2;
         }
         else if (i == 1){
-            decoder_input_blob_shape.x=decoder_inputs[i]->size();
+            decoder_input_blob_shape.x=(unsigned int)decoder_inputs[i]->size();
             decoder_input_blob_shape.y=batch_size;
             decoder_input_blob_shape.z=1;
             decoder_input_blob_shape.w=1;
@@ -317,14 +317,14 @@ int ailia_decode(AILIANetwork *ailia_decoder,
         }
         else if (i == 2){
             decoder_input_blob_shape.x=512;
-            decoder_input_blob_shape.y=encoder_outputs[0]->size()/512; //encoderのlast_hidden_stateのshape
+            decoder_input_blob_shape.y=(unsigned int)(encoder_outputs[0]->size()/512); //encoderのlast_hidden_stateのshape
             decoder_input_blob_shape.z=batch_size;
             decoder_input_blob_shape.w=1;
             decoder_input_blob_shape.dim=3;
         }
         else {
             decoder_input_blob_shape.x=64;
-            decoder_input_blob_shape.y=decoder_inputs[i]->size()/64/8;
+            decoder_input_blob_shape.y=(unsigned int)(decoder_inputs[i]->size()/64/8);
             decoder_input_blob_shape.z=8;
             decoder_input_blob_shape.w=batch_size;
             decoder_input_blob_shape.dim=4;
@@ -342,22 +342,22 @@ int ailia_decode(AILIANetwork *ailia_decoder,
 
         if (i == 0){
             if (encoder_inputs[1]->size() > 0){
-            status = ailiaSetInputBlobData(ailia_decoder, &(*encoder_inputs[1])[0], encoder_inputs[1]->size() * sizeof(float), decoder_input_blob_idx);
+            status = ailiaSetInputBlobData(ailia_decoder, &(*encoder_inputs[1])[0], (unsigned int)(encoder_inputs[1]->size() * sizeof(float)), decoder_input_blob_idx);
             }
         }
         else if (i == 1){
             if (decoder_inputs[1]->size() > 0){
-                status = ailiaSetInputBlobData(ailia_decoder, &(*decoder_inputs[i])[0], decoder_inputs[i]->size() * sizeof(float), decoder_input_blob_idx);
+                status = ailiaSetInputBlobData(ailia_decoder, &(*decoder_inputs[i])[0], (unsigned int)(decoder_inputs[i]->size() * sizeof(float)), decoder_input_blob_idx);
             }
         }
         else if (i == 2){
             if (encoder_outputs[0]->size() > 0){
-            status = ailiaSetInputBlobData(ailia_decoder, &(*encoder_outputs[0])[0], encoder_outputs[0]->size() * sizeof(float), decoder_input_blob_idx);
+            status = ailiaSetInputBlobData(ailia_decoder, &(*encoder_outputs[0])[0], (unsigned int)(encoder_outputs[0]->size() * sizeof(float)), decoder_input_blob_idx);
             }
         }
         else {
             if (decoder_inputs[i]->size() > 0){
-            status = ailiaSetInputBlobData(ailia_decoder, &(*decoder_inputs[i])[0], decoder_inputs[i]->size() * sizeof(float), decoder_input_blob_idx);
+            status = ailiaSetInputBlobData(ailia_decoder, &(*decoder_inputs[i])[0], (unsigned int)(decoder_inputs[i]->size() * sizeof(float)), decoder_input_blob_idx);
             }
         }
         if (status != AILIA_STATUS_SUCCESS) {
@@ -393,7 +393,7 @@ int ailia_decode(AILIANetwork *ailia_decoder,
 
         (*decoder_outputs[i]).resize(decoder_output_blob_shape.x*decoder_output_blob_shape.y*decoder_output_blob_shape.z*decoder_output_blob_shape.w);
 
-        status =ailiaGetBlobData(ailia_decoder, &(*decoder_outputs[i])[0], decoder_outputs[i]->size() * sizeof(float), decoder_output_blob_idx);
+        status =ailiaGetBlobData(ailia_decoder, &(*decoder_outputs[i])[0], (unsigned int)(decoder_outputs[i]->size() * sizeof(float)), decoder_output_blob_idx);
         if (status != AILIA_STATUS_SUCCESS) {
             setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia_decoder));
             return status;
@@ -436,7 +436,7 @@ static int recognize_from_text(AILIANetwork* encoder_net, AILIANetwork* decoder_
     std::vector<float> past_key_values[DECODER_NUM_PAST_KEY];
 
     for (int i = 0; i < num_beams; i++){
-		decoder_input_ids[i] = pad_token_id;
+		decoder_input_ids[i] = (float)pad_token_id;
 	}
 	for (int i = 0; i < DECODER_NUM_PAST_KEY; i++){
 		past_key_values[i].resize(num_beams * 8 * 0 * 64);
@@ -493,7 +493,7 @@ static int recognize_from_text(AILIANetwork* encoder_net, AILIANetwork* decoder_
 			//PRINT_OUT("%f ", logits[i]);
 			if (prob < logits[i]){
 				prob = logits[i];
-				arg_max = i;
+				arg_max = (int)i;
 			}
 		}
 
@@ -504,7 +504,7 @@ static int recognize_from_text(AILIANetwork* encoder_net, AILIANetwork* decoder_
 		tokens.push_back(arg_max);
 
         for (int i = 0; i < num_beams; i++){
-			decoder_input_ids[i] = arg_max;
+			decoder_input_ids[i] = (float)arg_max;
 		}
 
 		if (arg_max == eos_token_id){

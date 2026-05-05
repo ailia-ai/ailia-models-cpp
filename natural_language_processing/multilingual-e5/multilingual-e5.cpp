@@ -149,10 +149,10 @@ static int argument_parser(int argc, char **argv)
 void softmax(float *data, int n){
 	float sum=0;
 	for(int i=0;i<n;i++){
-		sum+=exp(data[i]);
+		sum+=expf(data[i]);
 	}
 	for(int i=0;i<n;i++){
-		data[i]=exp(data[i])/sum;
+		data[i]=expf(data[i])/sum;
 	}
 }
 
@@ -246,7 +246,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		AILIAShape sequence_shape;
 		int batch_size = 1;
-		sequence_shape.x=inputs[i]->size();
+		sequence_shape.x=(unsigned int)inputs[i]->size();
 		sequence_shape.y=batch_size;
 		sequence_shape.z=1;
 		sequence_shape.w=1;
@@ -263,7 +263,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -298,7 +298,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -312,7 +312,7 @@ std::vector<float> mean_pool(std::vector<float> &features){
 	std::vector<float> mean(NUM_STATE);
 	for (int j = 0; j < NUM_STATE; j++){
 		float sum = 0;
-		int num_sentence = features.size() / NUM_STATE;
+		int num_sentence = (int)(features.size() / NUM_STATE);
 		for (int i = 0; i < num_sentence; i++){
 			sum += features[i * NUM_STATE + j];
 		}
@@ -411,7 +411,7 @@ float norm(std::vector<float> & vec1){
 	for (size_t i = 0; i < vec1.size(); i++){
 		norm1 += vec1[i] * vec1[i];
 	}
-	norm1 = sqrt(norm1);
+	norm1 = sqrtf(norm1);
 	return norm1;
 }
 
@@ -459,7 +459,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 		}
 		if (max_score < score){
 			max_score = score;
-			max_i = i;
+			max_i = (int)i;
 		}
 	}
 
