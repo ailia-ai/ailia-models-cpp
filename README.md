@@ -22,7 +22,7 @@ git submodule update
 On macOS, the bundled `.dylib` files come with the `com.apple.quarantine` attribute, which causes Gatekeeper to reject them with errors such as `libailia_voice.dylib is damaged`. Strip the attribute by running the helper script after `git submodule update`:
 
 ```
-./util/remove_quarantine.sh
+./xattr.sh
 ```
 
 ### Download license file
