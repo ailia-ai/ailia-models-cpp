@@ -141,7 +141,7 @@ static void print_inputs_error()
 static void print_arch_error(std::string arg)
 {
     PRINT_ERR("arcface: error: argument -a/--arch: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < MODEL_LISTS.size(); i++) {
+    for (size_t i = 0; i < MODEL_LISTS.size(); i++) {
         PRINT_ERR(" \'%s\'", MODEL_LISTS[i]);
         if (i < MODEL_LISTS.size() - 1) {
             PRINT_ERR(",");
@@ -155,7 +155,7 @@ static void print_arch_error(std::string arg)
 static void print_face_error(std::string arg)
 {
     PRINT_ERR("arcface: error: argument -f/--face: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < FACE_MODEL_LISTS.size(); i++) {
+    for (size_t i = 0; i < FACE_MODEL_LISTS.size(); i++) {
         PRINT_ERR(" \'%s\'", FACE_MODEL_LISTS[i]);
         if (i < FACE_MODEL_LISTS.size() - 1) {
             PRINT_ERR(",");
@@ -204,7 +204,7 @@ static int argument_parser(int argc, char **argv)
             }
         }
         else if (arg[0] != '-') {
-            int j;
+            size_t j;
             switch (status) {
             case 1:
                 image_path_1 = arg;
@@ -307,7 +307,7 @@ static void preprocess_image(const cv::Mat& simg, cv::Mat& dimg, bool input_is_b
     transpose(mimg3, mimg4, {2, 0, 1});
 
     std::vector<int> new_shape = {(int)mimg4.size[0], (int)mimg4.size[1], (int)mimg4.size[2]};
-    dimg = cv::Mat_<float>(new_shape.size(), &new_shape[0]);
+    dimg = cv::Mat_<float>((int)new_shape.size(), &new_shape[0]);
     unsigned char* sdata = (unsigned char*)mimg4.data;
     float*         ddata = (float*)dimg.data;
     for (int i = 0; i < mimg4.size[0]*mimg4.size[1]*mimg4.size[2]; i++) {
@@ -335,7 +335,7 @@ static int prepare_input_data(cv::Mat& img, const char* path)
 
 static float cosin_metric(const cv::Mat& x1, const cv::Mat& x2)
 {
-    return (float)x1.dot(x2) / (cv::norm(x1)*cv::norm(x2));
+    return (float)(x1.dot(x2) / (cv::norm(x1)*cv::norm(x2)));
 }
 
 
@@ -391,17 +391,17 @@ static int face_identification(std::vector<cv::Mat>& fe_list, AILIANetwork *net,
     // identification
     id_sim = 0;
     score_sim = 0.0f;
-    for (int i = 0; i < fe_list.size(); i++) {
+    for (size_t i = 0; i < fe_list.size(); i++) {
         cv::Mat fe;
         fe_list[i].copyTo(fe);;
         float sim = cosin_metric(fe, fe_2);
         if (sim > score_sim) {
-            id_sim = i;
+            id_sim = (int)i;
             score_sim = sim;
         }
     }
     if (score_sim < threshold) {
-        id_sim = fe_list.size();
+        id_sim = (int)fe_list.size();
         fe_list.push_back(fe_2);
         score_sim = 0.0f;
     }
@@ -742,10 +742,10 @@ static int compare_video(AILIANetwork *net)
                 return -1;
             }
 
-            count = detections.size();
+            count = (unsigned int)detections.size();
         }
 
-        for (int i = 0; i < count; i++) {
+        for (unsigned int i = 0; i < count; i++) {
             // get detected face
             AILIADetectorObject obj;
             float margin;
@@ -801,11 +801,11 @@ static int compare_video(AILIANetwork *net)
             // display result
             float fontScale = (float)w / 512.0f;
             int thickness = 2;
-            cv::Scalar color = hsv_to_rgb(256*((float)id_sim/16.0f), 255, 255);
+            cv::Scalar color = hsv_to_rgb((int)(256*((float)id_sim/16.0f)), 255, 255);
             cv::rectangle(frame, top_left, bottom_right, color, 2);
             cv::Point text_position((int)fx+4, (int)(fy+fh)-8);
             char score[20];
-            sprintf(score, "%d : %5.3f", id_sim, score_sim);
+            snprintf(score, sizeof(score), "%d : %5.3f", id_sim, score_sim);
             cv::putText(frame, score, text_position, cv::FONT_HERSHEY_SIMPLEX, fontScale, color, thickness);
         }
 

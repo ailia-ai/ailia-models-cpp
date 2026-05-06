@@ -182,7 +182,7 @@ static void visualize_plots(cv::Mat& image, const cv::Mat& preds_ailia)
             cv::Scalar color = cv::Scalar(0, 255, 255);
             int thickness = -1;
             int linetype = 4;
-            cv::circle(image, cv::Point(x, y), circle_size, color, thickness, linetype);
+            cv::circle(image, cv::Point((int)x, (int)y), circle_size, color, thickness, linetype);
         }
     }
 
@@ -226,7 +226,7 @@ static int recognize_from_image(AILIANetwork *net)
 //    PRINT_OUT("output shape %d %d %d %d %d\n", output_shape.x, output_shape.y, output_shape.z, output_shape.w, output_shape.dim);
     int preds_size = output_shape.x*output_shape.y*output_shape.z*output_shape.w*sizeof(float);
     std::vector<int> shape = {(int)output_shape.z, (int)output_shape.y, (int)output_shape.x};
-    cv::Mat preds_ailia = cv::Mat(shape.size(), &shape[0], CV_32FC1);
+    cv::Mat preds_ailia = cv::Mat((int)shape.size(), &shape[0], CV_32FC1);
 
     // inference
     PRINT_OUT("Start inference...\n");
@@ -280,7 +280,7 @@ static int recognize_from_video(AILIANetwork *net)
 //    PRINT_OUT("output shape %d %d %d %d %d\n", output_shape.x, output_shape.y, output_shape.z, output_shape.w, output_shape.dim);
     int preds_size = output_shape.x*output_shape.y*output_shape.z*output_shape.w*sizeof(float);
     std::vector<int> shape = {(int)output_shape.z, (int)output_shape.y, (int)output_shape.x};
-    cv::Mat preds_ailia = cv::Mat(shape.size(), &shape[0], CV_32FC1);
+    cv::Mat preds_ailia = cv::Mat((int)shape.size(), &shape[0], CV_32FC1);
 
     cv::VideoCapture capture;
     if (video_path == "0") {

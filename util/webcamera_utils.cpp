@@ -22,7 +22,7 @@ int adjust_frame_size(const cv::Mat& sframe, cv::Mat& dframe, int d_width, int d
     float scale = std::max<float>((float)s_width/(float)d_width, (float)s_height/(float)d_height);
 
     // padding base
-    cv::Mat dframe0 = cv::Mat(std::round(scale*(float)d_height), std::round(scale*(float)d_width), sframe.type(), cv::Scalar(0, 0, 0, 255));
+    cv::Mat dframe0 = cv::Mat((int)std::round(scale*(float)d_height), (int)std::round(scale*(float)d_width), sframe.type(), cv::Scalar(0, 0, 0, 255));
 
     int start_x = (dframe0.cols - s_width)  / 2;
     int start_y = (dframe0.rows - s_height) / 2;
@@ -45,7 +45,7 @@ int adjust_frame_size(const cv::Mat& sframe, cv::Mat& dframe0, cv::Mat& dframe, 
     float scale = std::max<float>((float)s_width/(float)d_width, (float)s_height/(float)d_height);
 
     // padding base
-    dframe0 = cv::Mat(std::round(scale*(float)d_height), std::round(scale*(float)d_width), sframe.type(), cv::Scalar(0, 0, 0, 255));
+    dframe0 = cv::Mat((int)std::round(scale*(float)d_height), (int)std::round(scale*(float)d_width), sframe.type(), cv::Scalar(0, 0, 0, 255));
 
     int start_x = (dframe0.cols - s_width)  / 2;
     int start_y = (dframe0.rows - s_height) / 2;

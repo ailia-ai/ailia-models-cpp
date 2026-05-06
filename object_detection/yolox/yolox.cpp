@@ -374,7 +374,7 @@ int main(int argc, char **argv)
                                  AILIA_NETWORK_IMAGE_CHANNEL_FIRST,
                                  AILIA_NETWORK_IMAGE_RANGE_UNSIGNED_INT8,
                                  AILIA_DETECTOR_ALGORITHM_YOLOX,
-                                 COCO_CATEGORY.size(), flags);
+                                 (unsigned int)COCO_CATEGORY.size(), flags);
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ailiaCreateDetector failed %d\n", status);
         ailiaDestroy(ailia);

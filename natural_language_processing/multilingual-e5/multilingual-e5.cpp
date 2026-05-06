@@ -149,10 +149,10 @@ static int argument_parser(int argc, char **argv)
 void softmax(float *data, int n){
 	float sum=0;
 	for(int i=0;i<n;i++){
-		sum+=exp(data[i]);
+		sum+=expf(data[i]);
 	}
 	for(int i=0;i<n;i++){
-		data[i]=exp(data[i])/sum;
+		data[i]=expf(data[i])/sum;
 	}
 }
 
@@ -209,7 +209,7 @@ std::vector<int> encode(std::string text, struct AILIATokenizer *tokenizer){
 }
 
 std::string decode(std::vector<int> &tokens, struct AILIATokenizer *tokenizer){
-	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], tokens.size());
+	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], (unsigned int)tokens.size());
 	if (status != AILIA_STATUS_SUCCESS){
 		setErrorDetail("ailiaTokenizerDecode", "");
 		return std::string("");
@@ -246,7 +246,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		AILIAShape sequence_shape;
 		int batch_size = 1;
-		sequence_shape.x=inputs[i]->size();
+		sequence_shape.x=(unsigned int)inputs[i]->size();
 		sequence_shape.y=batch_size;
 		sequence_shape.z=1;
 		sequence_shape.w=1;
@@ -263,7 +263,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -298,7 +298,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -312,7 +312,7 @@ std::vector<float> mean_pool(std::vector<float> &features){
 	std::vector<float> mean(NUM_STATE);
 	for (int j = 0; j < NUM_STATE; j++){
 		float sum = 0;
-		int num_sentence = features.size() / NUM_STATE;
+		int num_sentence = (int)(features.size() / NUM_STATE);
 		for (int i = 0; i < num_sentence; i++){
 			sum += features[i * NUM_STATE + j];
 		}
@@ -375,7 +375,7 @@ std::vector<float> calc_embedding(AILIANetwork* net, struct AILIATokenizer *toke
 	if (prompt && debug){
 		PRINT_OUT("Input Tokens :\n");
 	}
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		input_ids[i] = (float)tokens[i];
 		attention_mask[i] = 1;
 		if (prompt && debug){
@@ -408,10 +408,10 @@ std::vector<float> calc_embedding(AILIANetwork* net, struct AILIATokenizer *toke
 
 float norm(std::vector<float> & vec1){
 	float norm1 = 0;
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		norm1 += vec1[i] * vec1[i];
 	}
-	norm1 = sqrt(norm1);
+	norm1 = sqrtf(norm1);
 	return norm1;
 }
 
@@ -419,7 +419,7 @@ float cos_similarity(std::vector<float> & vec1, std::vector<float> & vec2){
 	float sum = 0;
 	float norm1 = norm(vec1);
 	float norm2 = norm(vec2);
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		sum += (vec1[i] / norm1) * (vec2[i] / norm2);
 	}
 	return sum;
@@ -427,7 +427,7 @@ float cos_similarity(std::vector<float> & vec1, std::vector<float> & vec2){
 
 static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokenizer)
 {
-	int status = AILIA_STATUS_SUCCESS;
+	// unused: int status = AILIA_STATUS_SUCCESS;
 
 	// Open database
 	std::vector<std::string> texts = open_texts(std::string("sample.txt"));
@@ -435,8 +435,8 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	// Embedding
 	std::vector< std::vector<float> > embeddings;
 	PRINT_OUT("Calculating embeddings\n");
-	for (int i = 0; i < texts.size(); i++){
-		PRINT_OUT("\r%d/%d", i, texts.size());
+	for (size_t i = 0; i < texts.size(); i++){
+		PRINT_OUT("\r%zu/%zu", i, texts.size());
 		fflush(stdout);
 		std::vector<float> embedding = calc_embedding(net, tokenizer, std::string("passage: ") + texts[i], false);
 		embeddings.push_back(embedding);
@@ -452,14 +452,14 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	// Search
 	float max_score = 0.0f;
 	int max_i = 0;
-	for (int i = 0; i < texts.size(); i++){
+	for (size_t i = 0; i < texts.size(); i++){
 		float score = cos_similarity(query_embedding, embeddings[i]);
 		if (debug){
 			PRINT_OUT("%f ",score);
 		}
 		if (max_score < score){
 			max_score = score;
-			max_i = i;
+			max_i = (int)i;
 		}
 	}
 
@@ -491,7 +491,7 @@ int main(int argc, char **argv)
 	for (unsigned int i = 0; i < env_count; i++) {
 		AILIAEnvironment* env;
 		status = ailiaGetEnvironment(&env, i, AILIA_ENVIRONMENT_VERSION);
-		bool is_fp16 = (env->props & AILIA_ENVIRONMENT_PROPERTY_FP16) != 0;
+		// unused: bool is_fp16 = (env->props & AILIA_ENVIRONMENT_PROPERTY_FP16) != 0;
 		PRINT_OUT("env_id : %d type : %d name : %s", env->id, env->type, env->name);
 		//if (is_fp16){
 		//	PRINT_OUT(" (Warning : FP16 backend is not worked this model)\n");

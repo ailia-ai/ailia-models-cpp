@@ -163,21 +163,21 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		AILIAShape sequence_shape;
 		int batch_size = 1;
 		if ( i == 0 ){
-			sequence_shape.x=inputs[i]->size() / batch_size;
+			sequence_shape.x=(unsigned int)(inputs[i]->size() / batch_size);
 			sequence_shape.y=batch_size;
 			sequence_shape.z=1;
 			sequence_shape.w=1;
 			sequence_shape.dim=2;
 		}
 		if ( i == 1 ){
-			sequence_shape.x=inputs[i]->size();
+			sequence_shape.x=(unsigned int)inputs[i]->size();
 			sequence_shape.y=1;
 			sequence_shape.z=1;
 			sequence_shape.w=1;
 			sequence_shape.dim=1;
 		}
 		if ( i == 2 || i == 3){
-			sequence_shape.x=inputs[i]->size() / batch_size / 2;
+			sequence_shape.x=(unsigned int)(inputs[i]->size() / batch_size / 2);
 			sequence_shape.y=batch_size;
 			sequence_shape.z=2;
 			sequence_shape.w=1;
@@ -194,7 +194,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -229,7 +229,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -252,14 +252,14 @@ std::vector<float> calc_vad(AILIANetwork* net, std::vector<float> wave, int samp
 	std::vector<float> conf;
 
 	for (int s = 0; s < nSamples; s+=sequence){
-		for (int i = 0; i < input.size(); i++){
-			if (s + i < nSamples){
+		for (size_t i = 0; i < input.size(); i++){
+			if (s + (int)i < nSamples){
 				input[i] = wave[s + i];
 			}else{
 				input[i] = 0;
 			}
 		}
-		sr[0] = sampleRate;
+		sr[0] = (float)sampleRate;
 		if (debug){
 			PRINT_OUT("\n");
 		}
@@ -287,7 +287,7 @@ std::vector<float> calc_vad(AILIANetwork* net, std::vector<float> wave, int samp
 
 static int recognize_from_audio(AILIANetwork* net)
 {
-	int status = AILIA_STATUS_SUCCESS;
+	// unused: int status = AILIA_STATUS_SUCCESS;
 
 	int sampleRate, nChannels, nSamples;
 	std::vector<float> wave = read_wave_file(input_text.c_str(), &sampleRate, &nChannels, &nSamples);
@@ -309,7 +309,7 @@ static int recognize_from_audio(AILIANetwork* net)
 	std::vector<float> conf = calc_vad(net, wave, sampleRate, nChannels, nSamples);
 
 	PRINT_OUT("Confidence :\n");
-	for (int i = 0; i < conf.size(); i++){
+	for (size_t i = 0; i < conf.size(); i++){
 		if (i < 10){
 			PRINT_OUT("%f sec %f\n", i * sampleRate / 1536.0f, conf[i]);
 		}

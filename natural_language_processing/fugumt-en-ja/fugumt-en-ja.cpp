@@ -156,9 +156,9 @@ void log_softmax(float *data, int n){
 
 	float sum = 0;
 	for (int i = 0; i < n; i++){
-		sum += exp(data[i] - max_value);
+		sum += expf(data[i] - max_value);
 	}
-	sum = log(sum);
+	sum = logf(sum);
 
 	for (int i = 0; i < n; i++){
 		data[i] = (data[i] - max_value) - sum;
@@ -192,7 +192,7 @@ std::vector<int> encode(std::string text, struct AILIATokenizer *tokenizer){
 }
 
 std::string decode(std::vector<int> &tokens, struct AILIATokenizer *tokenizer){
-	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], tokens.size());
+	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], (unsigned int)tokens.size());
 	if (status != AILIA_STATUS_SUCCESS){
 		setErrorDetail("ailiaTokenizerDecode", "");
 		return std::string("");
@@ -230,7 +230,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		AILIAShape sequence_shape;
 		int batch_size = 1;
 		if (i == 0 || i == 1){
-			sequence_shape.x=inputs[i]->size();
+			sequence_shape.x=(unsigned int)inputs[i]->size();
 			sequence_shape.y=batch_size;
 			sequence_shape.z=1;
 			sequence_shape.w=1;
@@ -244,7 +244,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 				sequence_shape.dim=2;
 			}else{
 				sequence_shape.x=64;
-				sequence_shape.y=inputs[i]->size()/64/8;
+				sequence_shape.y=(unsigned int)(inputs[i]->size()/64/8);
 				sequence_shape.z=8;
 				sequence_shape.w=batch_size;
 				sequence_shape.dim=4;
@@ -262,7 +262,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -297,7 +297,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -326,14 +326,14 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	std::vector<float> past_key_values[NUM_PAST_KEY];
 
 	PRINT_OUT("Input Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		input_ids[i] = (float)tokens[i];
 		attention_mask[i] = 1;
 		PRINT_OUT("%d ", (int)input_ids[i]);
 	}
 	PRINT_OUT("\n");
 	for (int i = 0; i < num_beams; i++){
-		decoder_input_ids[i] = pad_token_id;
+		decoder_input_ids[i] = (float)pad_token_id;
 	}
 	for (int i = 0; i < NUM_PAST_KEY; i++){
 		past_key_values[i].resize(num_beams * 8 * 0 * 64);
@@ -372,15 +372,15 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 
 		int eos_token_id = 0;
 
-		log_softmax(&logits[0], logits.size());
+		log_softmax(&logits[0], (int)logits.size());
 
 		float prob = -INFINITY;
 		int arg_max = 0;
-		for (int i = 0; i < logits.size(); i++){
+		for (size_t i = 0; i < logits.size(); i++){
 			//PRINT_OUT("%f ", logits[i]);
 			if (prob < logits[i]){
 				prob = logits[i];
-				arg_max = i;
+				arg_max = (int)i;
 			}
 		}
 
@@ -391,7 +391,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 		tokens.push_back(arg_max);
 
 		for (int i = 0; i < num_beams; i++){
-			decoder_input_ids[i] = arg_max;
+			decoder_input_ids[i] = (float)arg_max;
 		}
 
 		if (arg_max == eos_token_id){
@@ -404,7 +404,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	PRINT_OUT("Output : %s\n",text.c_str());
 
 	PRINT_OUT("Output Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		PRINT_OUT("%d ", tokens[i]);
 	}
 	PRINT_OUT("\n");

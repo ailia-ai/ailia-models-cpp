@@ -94,10 +94,10 @@ void write_wave_file(const char *path, std::vector<float> data, int sampling_rat
 		return;
 	}
 	int channel_n = 1;
-	write_header(fp, data.size(), channel_n, sampling_rate);
-	for (int i = 0; i < data.size(); i++){
-		int pcm = data[i] * 32767;
-		short pcm_16bit = std::max(std::min(pcm, 32767), -32768);
+	write_header(fp, (int)data.size(), channel_n, sampling_rate);
+	for (size_t i = 0; i < data.size(); i++){
+		int pcm = (int)(data[i] * 32767);
+		short pcm_16bit = (short)std::max(std::min(pcm, 32767), -32768);
 		fwrite(&pcm_16bit,2,1,fp);
 	}
 	fclose(fp);

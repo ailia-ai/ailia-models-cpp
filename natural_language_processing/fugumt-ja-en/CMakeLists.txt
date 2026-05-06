@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.1)
+﻿cmake_minimum_required(VERSION 3.10)
 
 set (PROJECT_NAME fugumt-ja-en)
 set (SRC_FILES ${PROJECT_NAME}.cpp)

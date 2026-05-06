@@ -105,7 +105,7 @@ static void print_error(std::string arg)
 static void print_arch_error(std::string arg)
 {
     PRINT_ERR("u2net: error: argument -a/--arch: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < MODEL_LISTS.size(); i++) {
+    for (size_t i = 0; i < MODEL_LISTS.size(); i++) {
         PRINT_ERR(" \'%s\'", MODEL_LISTS[i]);
         if (i < MODEL_LISTS.size() - 1) {
             PRINT_ERR(",");
@@ -119,7 +119,7 @@ static void print_arch_error(std::string arg)
 static void print_opset_error(std::string arg)
 {
     PRINT_ERR("u2net: error: argument -o/--opset: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < OPSET_LISTS.size(); i++) {
+    for (size_t i = 0; i < OPSET_LISTS.size(); i++) {
         PRINT_ERR(" \'%s\'", OPSET_LISTS[i]);
         if (i < OPSET_LISTS.size() - 1) {
             PRINT_ERR(",");
@@ -170,7 +170,7 @@ static int argument_parser(int argc, char **argv)
             }
         }
         else if (arg[0] != '-') {
-            int j;
+            size_t j;
             switch (status) {
             case 1:
                 image_path = arg;
@@ -298,7 +298,7 @@ static int recognize_from_image(AILIANetwork *net)
     }
 
     std::vector<int> new_shape = {(int)output_shape.y, (int)output_shape.x};
-    preds_ailia.reshape(1, new_shape.size(), &new_shape[0]);
+    preds_ailia.reshape(1, (int)new_shape.size(), &new_shape[0]);
     status = save_result(preds_ailia, save_image_path.c_str(), src_size);
     if (status != AILIA_STATUS_SUCCESS) {
         return -1;
@@ -352,8 +352,8 @@ static int recognize_from_video(AILIANetwork *net)
     }
 
     // create video writer if savepath is specified as video format
-    int f_w = capture.get(cv::CAP_PROP_FRAME_WIDTH);
-    int f_h = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+    int f_w = (int)capture.get(cv::CAP_PROP_FRAME_WIDTH);
+    int f_h = (int)capture.get(cv::CAP_PROP_FRAME_HEIGHT);
     cv::VideoWriter writer;
     if (save_image_path != SAVE_IMAGE_PATH) {
         status = get_writer(writer, save_image_path.c_str(), cv::Size(f_w, f_h), false);

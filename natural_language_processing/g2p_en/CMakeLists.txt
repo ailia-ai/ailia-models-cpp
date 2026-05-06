@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.1)
+﻿cmake_minimum_required(VERSION 3.10)
 
 set (PROJECT_NAME g2p_en)
 set (SRC_FILES ${PROJECT_NAME}.cpp g2p_en_averaged_perceptron.cpp g2p_en_expand.cpp g2p_en_model.cpp g2p_en_file.cpp)

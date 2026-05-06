@@ -204,7 +204,7 @@ void softmax(float *data, int n){
 
 float norm(std::vector<float> & vec1){
 	float norm1 = 0;
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		norm1 += vec1[i] * vec1[i];
 	}
 	norm1 = sqrt(norm1);
@@ -215,7 +215,7 @@ float cos_similarity(std::vector<float> & vec1, std::vector<float> & vec2){
 	float sum = 0;
 	float norm1 = norm(vec1);
 	float norm2 = norm(vec2);
-	for (int i = 0; i < vec1.size(); i++){
+	for (size_t i = 0; i < vec1.size(); i++){
 		sum += (vec1[i] / norm1) * (vec2[i] / norm2);
 	}
 	return sum;
@@ -229,8 +229,8 @@ std::vector<float> resize_and_center_crop(cv::Mat img){
     // rgb order, (/255 - mean )/std
     // resize to 224 and center crop
     std::vector<float> input_img(IMAGE_WIDTH * IMAGE_HEIGHT * 3);
-    float mean[3] = {0.48145466, 0.4578275, 0.40821073};
-    float stdf[3] = {0.26862954, 0.26130258, 0.27577711};
+    float mean[3] = {0.48145466f, 0.4578275f, 0.40821073f};
+    float stdf[3] = {0.26862954f, 0.26130258f, 0.27577711f};
     float ratio_w = 1.0f * img.cols / IMAGE_WIDTH;
     float ratio_h = 1.0f * img.rows / IMAGE_HEIGHT;
     float ratio = std::min(ratio_w, ratio_h);
@@ -240,8 +240,8 @@ std::vector<float> resize_and_center_crop(cv::Mat img){
     std::vector<unsigned char> preview(IMAGE_HEIGHT * IMAGE_WIDTH * 4);
     for (int y = 0; y < IMAGE_HEIGHT; y++){
         for (int x = 0; x < IMAGE_WIDTH; x++){
-            int y2 = y * ratio + (img.rows - IMAGE_HEIGHT * ratio)/2;
-            int x2 = x * ratio + (img.cols - IMAGE_WIDTH * ratio)/2;
+            int y2 = (int)(y * ratio + (img.rows - IMAGE_HEIGHT * ratio)/2);
+            int x2 = (int)(x * ratio + (img.cols - IMAGE_WIDTH * ratio)/2);
             if (x2 < img.cols && y2 < img.rows){
                 input_img[0 * IMAGE_WIDTH * IMAGE_HEIGHT + y * IMAGE_WIDTH + x] = (img.data[(img.cols * y2 + x2)*4 + 0] / 255.0f - mean[0])/stdf[0];
                 input_img[1 * IMAGE_WIDTH * IMAGE_HEIGHT + y * IMAGE_WIDTH + x] = (img.data[(img.cols * y2 + x2)*4 + 1] / 255.0f - mean[1])/stdf[1];
@@ -253,7 +253,7 @@ std::vector<float> resize_and_center_crop(cv::Mat img){
             }
             if (debug){
                 for (int i = 0; i < 3; i++){
-                    int v = (input_img[i * IMAGE_WIDTH * IMAGE_HEIGHT + y * IMAGE_WIDTH + x] * stdf[i] + mean[i])*255;
+                    int v = (int)((input_img[i * IMAGE_WIDTH * IMAGE_HEIGHT + y * IMAGE_WIDTH + x] * stdf[i] + mean[i])*255);
                     preview[(y*IMAGE_WIDTH + x)*4 + i] = std::max(0, std::min(255, v));
                 }
             }
@@ -311,7 +311,7 @@ static std::vector<float> image_embedding(AILIANetwork *image_enc, std::string p
         return features;
     }
 
-    status = ailiaPredict(image_enc, &features[0], features.size() * sizeof(float), &input_img[0], input_img.size() * sizeof(float));
+    status = ailiaPredict(image_enc, &features[0], (unsigned int)(features.size() * sizeof(float)), &input_img[0], (unsigned int)(input_img.size() * sizeof(float)));
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ImageEmbedding ailiaPredict failed %d\n", status);
         return features;
@@ -335,7 +335,7 @@ std::vector<int> tokenize(AILIATokenizer * tokenizer, std::string text){
 	ailiaTokenizerGetTokens(tokenizer, &tokens[0], count);
     std::vector<int> pad_tokens(CONTEXT_LENGTH);
     for (int i = 0; i < CONTEXT_LENGTH; i++){
-        if (i < tokens.size()){
+        if ((size_t)i < tokens.size()){
             pad_tokens[i] = tokens[i];
             if (i == CONTEXT_LENGTH - 1){
                 pad_tokens[i] = tokens[tokens.size() - 1]; // SOT
@@ -346,7 +346,7 @@ std::vector<int> tokenize(AILIATokenizer * tokenizer, std::string text){
     }
     if (debug){
         printf("Tokens : ");
-        for (int i = 0; i < pad_tokens.size(); i++){
+        for (size_t i = 0; i < pad_tokens.size(); i++){
             printf("%d ", pad_tokens[i]);
         }
         printf("\n");
@@ -378,7 +378,7 @@ std::vector<float> text_embedding(AILIANetwork *ailia_text, std::vector<int> &to
     }
 
     if (tokens.size() != CONTEXT_LENGTH){
-        PRINT_ERR("Invalid token size %lu\n", tokens.size());
+        PRINT_ERR("Invalid token size %zu\n", tokens.size());
         return features;
     }
 
@@ -386,7 +386,7 @@ std::vector<float> text_embedding(AILIANetwork *ailia_text, std::vector<int> &to
     for (int i = 0; i < CONTEXT_LENGTH; i++){
         tokens_float[i] = (float)tokens[i];
     }
-    status = ailiaPredict(ailia_text, &features[0], features.size() * sizeof(float), &tokens_float[0], tokens_float.size() * sizeof(float));
+    status = ailiaPredict(ailia_text, &features[0], (unsigned int)(features.size() * sizeof(float)), &tokens_float[0], (unsigned int)(tokens_float.size() * sizeof(float)));
     if (status != AILIA_STATUS_SUCCESS){
         PRINT_ERR("TextEmbedding ailiaGetErrorDetail %s\n", ailiaGetErrorDetail(ailia_text));
         return features;
@@ -411,7 +411,7 @@ int get_env_id(void)
 	for (unsigned int i = 0; i < env_count; i++) {
 		AILIAEnvironment* env;
 		status = ailiaGetEnvironment(&env, i, AILIA_ENVIRONMENT_VERSION);
-		bool is_fp16 = (env->props & AILIA_ENVIRONMENT_PROPERTY_FP16) != 0;
+		// unused: bool is_fp16 = (env->props & AILIA_ENVIRONMENT_PROPERTY_FP16) != 0;
 		PRINT_OUT("env_id : %d type : %d name : %s", env->id, env->type, env->name);
 		PRINT_OUT("\n");
 		if (args_env_id == env->id){
@@ -511,7 +511,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
     PRINT_OUT("Tokenize...\n");
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         std::vector<int>  token = tokenize(tokenizer, texts[i]);
         tokens.push_back(token);
     }
@@ -520,7 +520,7 @@ int main(int argc, char **argv)
     // text embedding
     PRINT_OUT("Text embedding...\n");
     std::vector< std::vector<float> > text_features;
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         std::vector<float> features = text_embedding(ailia_text, tokens[i]);
         text_features.push_back(features);
     }
@@ -533,15 +533,15 @@ int main(int argc, char **argv)
     PRINT_OUT("Similarity...\n");
     std::vector<float> confs;
     std::vector<float> sims;
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         float sim = cos_similarity(image_features, text_features[i]);
         confs.push_back(sim * 100);
         sims.push_back(sim);
     }
 
-    softmax(&confs[0], confs.size());
+    softmax(&confs[0], (int)confs.size());
 
-    for (int i = 0; i < texts.size(); i++){
+    for (size_t i = 0; i < texts.size(); i++){
         printf("Label %s Confidence %f Similarity %f\n", texts[i].c_str(), confs[i], sims[i]);
     }
 

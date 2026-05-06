@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
 set (PROJECT_NAME gpt-sovits-v2-pro)
 set (SRC_FILES ${PROJECT_NAME}.cpp ../../util/wave_reader.cpp ../../util/wave_writer.cpp)

@@ -110,7 +110,7 @@ static void print_error(std::string arg)
 static void print_arch_error(std::string arg)
 {
     PRINT_ERR("resnet50: error: argument -a/--arch: invalid choice: \'%s\' (choose from", arg.c_str());
-    for (int i = 0; i < MODEL_NAMES.size(); i++) {
+    for (size_t i = 0; i < MODEL_NAMES.size(); i++) {
         PRINT_ERR(" \'%s\'", MODEL_NAMES[i]);
         if (i < MODEL_NAMES.size() - 1) {
             PRINT_ERR(",");
@@ -161,7 +161,7 @@ static int argument_parser(int argc, char **argv)
                 video_path = arg;
                 break;
             case 3:
-                int j;
+                size_t j;
                 for (j = 0; j < MODEL_NAMES.size(); j++) {
                     if (arg == MODEL_NAMES[j]) {
                         weight = arg + ".onnx";

@@ -23,7 +23,7 @@ void transpose(const cv::Mat& simg, cv::Mat& dimg, std::vector<int> swap = {2, 0
         size0 = {simg.size[0], simg.size[1], simg.size[2]};
     }
     std::vector<int> size1 = {size0[swap[0]], size0[swap[1]], size0[swap[2]]};
-    dimg = cv::Mat(size1.size(), &size1[0], CV_32FC1);
+    dimg = cv::Mat((int)size1.size(), &size1[0], CV_32FC1);
 
     if (simg.elemSize1() == sizeof(char)) {
         char* sdata = (char*)simg.data;
@@ -138,7 +138,7 @@ void concatenate(const cv::Mat& simg0, const cv::Mat& simg1, cv::Mat& dimg, int 
     }
 
     if (ndarray) {
-        dimg = cv::Mat(new_shape.size(), &new_shape[0], simg0.type());
+        dimg = cv::Mat((int)new_shape.size(), &new_shape[0], simg0.type());
     }
     else {
         dimg = cv::Mat(new_shape[0], new_shape[1], simg0.type());

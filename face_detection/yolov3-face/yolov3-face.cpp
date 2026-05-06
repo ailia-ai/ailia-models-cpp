@@ -323,7 +323,7 @@ int main(int argc, char **argv)
                                  AILIA_NETWORK_IMAGE_CHANNEL_FIRST,
                                  AILIA_NETWORK_IMAGE_RANGE_UNSIGNED_FP32,
                                  AILIA_DETECTOR_ALGORITHM_YOLOV3,
-                                 FACE_CATEGORY.size(), flags);
+                                 (unsigned int)FACE_CATEGORY.size(), flags);
     if (status != AILIA_STATUS_SUCCESS) {
         PRINT_ERR("ailiaCreateDetector failed %d\n", status);
         ailiaDestroy(ailia);

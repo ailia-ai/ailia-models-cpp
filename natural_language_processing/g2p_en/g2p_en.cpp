@@ -137,12 +137,12 @@ static int argument_parser(int argc, char **argv)
 void verify_output(std::vector<std::string> prons, std::vector<std::string> expect){
 	if (expect.size() > 0){
 		if (expect.size() != prons.size()){
-			PRINT_OUT("Invalid out token length %d vs %d\n", expect.size(), prons.size());
+			PRINT_OUT("Invalid out token length %zu vs %zu\n", expect.size(), prons.size());
 			throw("verify error");
 		}
-		for (int i = 0; i < prons.size(); i++){
+		for (size_t i = 0; i < prons.size(); i++){
 			if (expect[i] != prons[i]){
-				PRINT_OUT("Output token mismatch %s vs %s at %d\n", expect[i].c_str(), prons[i].c_str(), i);
+				PRINT_OUT("Output token mismatch %s vs %s at %zu\n", expect[i].c_str(), prons[i].c_str(), i);
 				throw("verify error");
 			}
 		}
@@ -207,11 +207,11 @@ int main(int argc, char **argv)
 		std::vector<std::string> prons = model.compute(reference_text);
 		auto end2 = std::chrono::high_resolution_clock::now();
 		if (benchmark){
-			PRINT_OUT("total processing time %lld ms\n",  std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
+			PRINT_OUT("total processing time %lld ms\n",  (long long)std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2).count());
 		}
 
 		PRINT_OUT("Output :\n");
-		for (int i = 0; i < prons.size(); i++){
+		for (size_t i = 0; i < prons.size(); i++){
 			PRINT_OUT("%s ", prons[i].c_str());
 		}
 		PRINT_OUT("\n");

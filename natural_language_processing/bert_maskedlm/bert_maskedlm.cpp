@@ -51,7 +51,7 @@ static std::string model(MODEL_PATH);
 static bool benchmark  = false;
 static int args_env_id = -1;
 
-std::string input_text = "私は[MASK]で動く。";
+std::string input_text = u8"私は[MASK]で動く。";
 
 
 // ======================
@@ -150,10 +150,10 @@ static int argument_parser(int argc, char **argv)
 void softmax(float *data, int n){
 	float sum=0;
 	for(int i=0;i<n;i++){
-		sum+=exp(data[i]);
+		sum+=expf(data[i]);
 	}
 	for(int i=0;i<n;i++){
-		data[i]=exp(data[i])/sum;
+		data[i]=expf(data[i])/sum;
 	}
 }
 
@@ -214,7 +214,7 @@ std::vector<int> encode(std::string text, struct AILIATokenizer *tokenizer){
 }
 
 std::string decode(std::vector<int> &tokens, struct AILIATokenizer *tokenizer){
-	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], tokens.size());
+	int status = ailiaTokenizerDecode(tokenizer, &tokens[0], (unsigned int)tokens.size());
 	if (status != AILIA_STATUS_SUCCESS){
 		setErrorDetail("ailiaTokenizerDecode", "");
 		return std::string("");
@@ -251,7 +251,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		AILIAShape sequence_shape;
 		int batch_size = 1;
-		sequence_shape.x=inputs[i]->size();
+		sequence_shape.x=(unsigned int)inputs[i]->size();
 		sequence_shape.y=batch_size;
 		sequence_shape.z=1;
 		sequence_shape.w=1;
@@ -268,7 +268,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 		}
 
 		if (inputs[i]->size() > 0){
-			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], inputs[i]->size() * sizeof(float), input_blob_idx);
+			status = ailiaSetInputBlobData(ailia, &(*inputs[i])[0], (unsigned int)(inputs[i]->size() * sizeof(float)), input_blob_idx);
 			if (status != AILIA_STATUS_SUCCESS) {
 				setErrorDetail("ailiaSetInputBlobData",ailiaGetErrorDetail(ailia));
 				return status;
@@ -303,7 +303,7 @@ int forward(AILIANetwork *ailia, std::vector<float> *inputs[NUM_INPUTS], std::ve
 
 		(*outputs[i]).resize(output_blob_shape.x*output_blob_shape.y*output_blob_shape.z*output_blob_shape.w);
 
-		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], outputs[i]->size() * sizeof(float), output_blob_idx);
+		status =ailiaGetBlobData(ailia, &(*outputs[i])[0], (unsigned int)(outputs[i]->size() * sizeof(float)), output_blob_idx);
 		if (status != AILIA_STATUS_SUCCESS) {
 			setErrorDetail("ailiaGetBlobData",ailiaGetErrorDetail(ailia));
 			return status;
@@ -325,7 +325,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	std::vector<float> token_type_ids(tokens.size());
 
 	PRINT_OUT("Input Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		input_ids[i] = (float)tokens[i];
 		attention_mask[i] = 1;
 		PRINT_OUT("%d ", (int)input_ids[i]);
@@ -347,14 +347,14 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	}
 
 	PRINT_OUT("Predictions :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		const int mask_id = 4;
 		if (tokens[i] == mask_id){
 			std::vector<int> topk_list = topk(&logits[i * NUM_WORDS], NUM_WORDS, 5);
-			for (int j = 0; j < topk_list.size(); j++){
+			for (size_t j = 0; j < topk_list.size(); j++){
 				std::vector<int> one_token;
 				one_token.push_back(topk_list[j]);
-				PRINT_OUT("%d %s %f\n", j, decode(one_token, tokenizer).c_str(), logits[i * NUM_WORDS + topk_list[j]]);
+				PRINT_OUT("%zu %s %f\n", j, decode(one_token, tokenizer).c_str(), logits[i * NUM_WORDS + topk_list[j]]);
 			}
 			tokens[i] = topk_list[0];
 		}
@@ -364,7 +364,7 @@ static int recognize_from_text(AILIANetwork* net, struct AILIATokenizer *tokeniz
 	PRINT_OUT("Output : %s\n",text.c_str());
 
 	PRINT_OUT("Output Tokens :\n");
-	for (int i = 0; i < tokens.size(); i++){
+	for (size_t i = 0; i < tokens.size(); i++){
 		attention_mask[i] = 1;
 		PRINT_OUT("%d ", tokens[i]);
 	}
