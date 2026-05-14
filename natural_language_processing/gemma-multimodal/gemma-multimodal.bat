@@ -6,7 +6,7 @@ set MODEL=gemma
 set EXE=gemma-multimodal
 set FILE1=gemma-4-E2B-it-Q4_K_M.gguf
 set FILE2=gemma-4-E2B-it-mmproj-F16.gguf
-set FILE3=sample.jpg
+set FILE3=sample_image.jpg
 
 rem download
 if not "%1" == "-h" if not "%1" == "--help" (
@@ -24,7 +24,7 @@ if not "%1" == "-h" if not "%1" == "--help" (
 if not "%1" == "-h" if not "%1" == "--help" (
     if not exist %FILE3% (
         echo Downloading sample image... ^(save path: %FILE3%^)
-        curl https://storage.googleapis.com/ailia-models/%MODEL%/%FILE3% -o %FILE3%
+        curl https://storage.googleapis.com/ailia-models/misc/%FILE3% -o %FILE3%
     )
 )
 

@@ -4,7 +4,7 @@ MODEL="gemma"
 EXE="gemma-multimodal"
 FILE1="gemma-4-E2B-it-Q4_K_M.gguf"
 FILE2="gemma-4-E2B-it-mmproj-F16.gguf"
-FILE3="sample.jpg"
+FILE3="sample_image.jpg"
 
 #download
 if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
@@ -22,7 +22,7 @@ fi
 if [ ! "$1" = "-h" ] && [ ! "$1" = "--help" ]; then
     if [ ! -e ${FILE3} ]; then
         echo "Downloading sample image... save path: ${FILE3}"
-        curl https://storage.googleapis.com/ailia-models/${MODEL}/${FILE3} -o ${FILE3}
+        curl https://storage.googleapis.com/ailia-models/misc/${FILE3} -o ${FILE3}
     fi
 fi
 

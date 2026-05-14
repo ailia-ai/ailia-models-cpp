@@ -73,7 +73,7 @@ output.png
 /pose_estimation/lightweight-human-pose-estimation/balloon.png
 /natural_language_processing/gemma/*.gguf
 /natural_language_processing/gemma-multimodal/*.gguf
-/natural_language_processing/gemma-multimodal/sample.jpg
+/natural_language_processing/gemma-multimodal/sample_image.jpg
 
 # ailia Voice / GPT-SoVITS sample data
 /audio_processing/gpt-sovits-v2-pro/gpt-sovits-v2-pro

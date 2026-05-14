@@ -66,7 +66,7 @@ int Generate(struct AILIALLM* llm, std::string &text){
 int main(int argc, char *argv[]){
     const char* model_path = "gemma-4-E2B-it-Q4_K_M.gguf";
     const char* mmproj_path = "gemma-4-E2B-it-mmproj-F16.gguf";
-    const char* image_path = "sample.jpg";
+    const char* image_path = "sample_image.jpg";
 
     if (argc >= 2) model_path = argv[1];
     if (argc >= 3) mmproj_path = argv[2];
