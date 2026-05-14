@@ -178,8 +178,8 @@ cd object_detection/yolox
 
 | Name | Detail | Exported From | Supported Ailia Version |
 |:-----------|------------:|:------------:|:------------:|
-|[gemma4](/large_language_model/gemma4) | Gemma 4n (E2B) text chat (gguf) via [ailia LLM](https://github.com/ailia-ai/ailia-llm-cpp) | gguf | 1.5.0 and later | |
-|[gemma4-multimodal](/large_language_model/gemma4) | Gemma 4n (E2B) multimodal (gguf + mmproj) via [ailia LLM](https://github.com/ailia-ai/ailia-llm-cpp) | gguf | 1.5.0 and later | |
+|[gemma4](/large_language_model/gemma4) | Gemma 4n (E2B) text chat (gguf) | gguf | 1.4.1 and later | |
+|[gemma4-multimodal](/large_language_model/gemma4) | Gemma 4n (E2B) multimodal (gguf + mmproj) | gguf | 1.4.1 and later | |
 
 ## Object detection
 
