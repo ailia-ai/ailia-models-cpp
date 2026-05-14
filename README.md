@@ -173,6 +173,8 @@ cd object_detection/yolox
 |[t5_whisper_medical](/natural_language_processing/t5_whisper_medical) | error correction of medical terms using t5 | Pytorch | 1.2.13 and later | |
 |[multilingual-e5](/natural_language_processing/multilingual-e5) | [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) | Pytorch | 1.2.15 and later | [JP](https://medium.com/axinc/multilingual-e5-%E5%A4%9A%E8%A8%80%E8%AA%9E%E3%81%AE%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88%E3%82%92embedding%E3%81%99%E3%82%8B%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%A2%E3%83%87%E3%83%AB-71f1dec7c4f0) |
 |[g2p_en](/natural_language_processing/g2p_en) | [g2p_en](https://github.com/Kyubyong/g2p) | Pytorch | 1.2.14 and later | |
+|[gemma](/natural_language_processing/gemma) | [Gemma](https://huggingface.co/google/gemma-3n-E2B-it) (gguf) via [ailia LLM](https://github.com/ailia-ai/ailia-llm-cpp) | gguf | 1.5.0 and later | |
+|[gemma-multimodal](/natural_language_processing/gemma-multimodal) | [Gemma](https://huggingface.co/google/gemma-3n-E2B-it) multimodal (gguf + mmproj) via [ailia LLM](https://github.com/ailia-ai/ailia-llm-cpp) | gguf | 1.5.0 and later | |
 
 ## Object detection
 

@@ -28,7 +28,7 @@ fi
 mkdir -p "${LOG_DIR}"
 
 # Set runtime library search path so the bundled .so files are picked up.
-export LD_LIBRARY_PATH="${ROOT_DIR}/ailia/library/linux/x64:${ROOT_DIR}/ailia_audio/library/linux/x64:${ROOT_DIR}/ailia_tokenizer/library/linux/x64:${ROOT_DIR}/ailia_speech/library/linux/x64:${ROOT_DIR}/ailia_voice/library/linux/x64:${ROOT_DIR}/ailia_tracker/library/linux/x64:${ROOT_DIR}/ailia_tflite/library/linux/x64:${LD_LIBRARY_PATH:-}"
+export LD_LIBRARY_PATH="${ROOT_DIR}/ailia/library/linux/x64:${ROOT_DIR}/ailia_audio/library/linux/x64:${ROOT_DIR}/ailia_tokenizer/library/linux/x64:${ROOT_DIR}/ailia_speech/library/linux/x64:${ROOT_DIR}/ailia_voice/library/linux/x64:${ROOT_DIR}/ailia_tracker/library/linux/x64:${ROOT_DIR}/ailia_tflite/library/linux/x64:${ROOT_DIR}/ailia_llm/library/linux/x64:${LD_LIBRARY_PATH:-}"
 
 # (sample_dir, sample_binary, args)   -- args are appended verbatim
 SAMPLES=(
@@ -52,6 +52,8 @@ SAMPLES=(
     "natural_language_processing/sentence_transformers|sentence_transformers|"
     "natural_language_processing/t5_whisper_medical|t5_whisper_medical|"
     "natural_language_processing/multilingual-e5|multilingual-e5|"
+    "natural_language_processing/gemma|gemma|"
+    "natural_language_processing/gemma-multimodal|gemma-multimodal|"
     "object_detection/yolov3-tiny|yolov3-tiny|"
     "object_detection/yolox|yolox|"
     "object_detection/m2det|m2det|"
