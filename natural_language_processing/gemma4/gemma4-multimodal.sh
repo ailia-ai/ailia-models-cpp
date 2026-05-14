@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MODEL="gemma"
-EXE="gemma-multimodal"
+EXE="gemma4-multimodal"
 FILE1="gemma-4-E2B-it-Q4_K_M.gguf"
 FILE2="gemma-4-E2B-it-mmproj-F16.gguf"
 FILE3="sample_image.jpg"

@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 cd %~dp0
 
 set MODEL=gemma
-set EXE=gemma-multimodal
+set EXE=gemma4-multimodal
 set FILE1=gemma-4-E2B-it-Q4_K_M.gguf
 set FILE2=gemma-4-E2B-it-mmproj-F16.gguf
 set FILE3=sample_image.jpg

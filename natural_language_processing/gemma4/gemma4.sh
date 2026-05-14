@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MODEL="gemma"
-EXE="gemma"
+EXE="gemma4"
 FILE1="gemma-4-E2B-it-Q4_K_M.gguf"
 
 #download

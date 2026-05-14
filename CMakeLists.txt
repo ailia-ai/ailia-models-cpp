@@ -99,8 +99,7 @@ endif()
 # require ailia LLM
 if(UNIX AND CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
 else()
-add_subdirectory(natural_language_processing/gemma)
-add_subdirectory(natural_language_processing/gemma-multimodal)
+add_subdirectory(natural_language_processing/gemma4)
 endif()
 
 # require ailia Voice

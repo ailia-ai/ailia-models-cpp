@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 cd %~dp0
 
 set MODEL=gemma
-set EXE=gemma
+set EXE=gemma4
 set FILE1=gemma-4-E2B-it-Q4_K_M.gguf
 
 rem download

@@ -39,8 +39,8 @@ output.png
 /natural_language_processing/multilingual-e5/multilingual-e5
 /natural_language_processing/sentence_transformers/sentence_transformers
 /natural_language_processing/t5_whisper_medical/t5_whisper_medical
-/natural_language_processing/gemma/gemma
-/natural_language_processing/gemma-multimodal/gemma-multimodal
+/natural_language_processing/gemma4/gemma4
+/natural_language_processing/gemma4/gemma4-multimodal
 /object_detection/m2det/m2det
 /object_detection/yolov3-tiny/yolov3-tiny
 /object_detection/yolox/yolox
@@ -71,9 +71,8 @@ output.png
 /face_recognition/mediapipe_iris/man.jpg
 /object_detection/yolov3-tiny/couple.jpg
 /pose_estimation/lightweight-human-pose-estimation/balloon.png
-/natural_language_processing/gemma/*.gguf
-/natural_language_processing/gemma-multimodal/*.gguf
-/natural_language_processing/gemma-multimodal/sample_image.jpg
+/natural_language_processing/gemma4/*.gguf
+/natural_language_processing/gemma4/sample_image.jpg
 
 # ailia Voice / GPT-SoVITS sample data
 /audio_processing/gpt-sovits-v2-pro/gpt-sovits-v2-pro

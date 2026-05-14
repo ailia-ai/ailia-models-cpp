@@ -73,7 +73,7 @@ int main(int argc, char *argv[]){
     if (argc >= 4) image_path = argv[3];
 
     if (argc == 1){
-        printf("Usage : gemma-multimodal <model_path> <mmproj_path> [image_path]\n");
+        printf("Usage : gemma4-multimodal <model_path> <mmproj_path> [image_path]\n");
         printf("Using defaults: %s %s %s\n", model_path, mmproj_path, image_path);
     }
 
