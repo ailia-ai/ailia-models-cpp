@@ -19,3 +19,6 @@
 [submodule "ailia_tflite"]
 	path = ailia_tflite
 	url = https://github.com/ailia-ai/ailia-tflite-cpp.git
+[submodule "ailia_llm"]
+	path = ailia_llm
+	url = https://github.com/ailia-ai/ailia-llm-cpp.git
